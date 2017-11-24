@@ -16,6 +16,21 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              );
 #undef NJ_MODE_PRINT_ENTER_HOOK
 
+CUSTOM_COMMAND_SIG(nj_mode_enter_chord_replace_single)
+CUSTOM_DOC("Activates 'chord replace single' mode.")
+{
+    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+}
+
+NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
+    begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+    inherit_map(context, mapid_nomap); 
+    bind_vanilla_keys(context, nj_replace_character_then_prev); 
+    bind(context, 'v', MDFR_CTRL, nj_mode_chord_replace_single_paste_then_prev); 
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
+    end_map(context);
+}
+
 CUSTOM_COMMAND_SIG(nj_replace_character_then_prev)
 CUSTOM_DOC("Replaces the character under the cursor with the pressed character, then return to the previous mode."){
     exec_command(app, nj_replace_character);
@@ -35,15 +50,6 @@ CUSTOM_DOC("Removes the character under the cursor, then paste from the clipboar
     exec_command(app, paste);
     exec_command(app, nj_activate_previous_mode);
 }
-
-
-#define nj_bind_mode_keys_chord_replace_single(context)\
-begin_map(context, mapid_chord_replace_single); \
-inherit_map(context, mapid_nomap); \
-bind_vanilla_keys(context, nj_replace_character_then_prev); \
-bind(context, 'v', MDFR_CTRL, nj_mode_chord_replace_single_paste_then_prev); \
-bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); \
-end_map(context);
 
 
 #endif // NJ_MODE_CHORD_REPLACE_SINGLE_CPP

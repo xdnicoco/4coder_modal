@@ -31,6 +31,9 @@ enum NJ_Mapid {
 #undef NJ_MODE_MAPID
 };
 
+#define NJ_MODE_MAPID_(mode) mapid_##mode
+#define NJ_MODE_MAPID(mode) NJ_MODE_MAPID_(mode)
+
 NJ_Mapid nj_previous_mapid;
 
 #define NJ_MODE_STATE_(mode) nj_mode_state_##mode
@@ -38,6 +41,9 @@ NJ_Mapid nj_previous_mapid;
 
 #define NJ_MODE_STATE_DECLERATION_(mode) NJ_Mode_State_##mode
 #define NJ_MODE_STATE_DECLERATION(mode)  NJ_MODE_STATE_DECLERATION_(mode)
+
+#define NJ_MODE_BIND_DECLERATION_(mode) inline void nj_bind_mode_keys_##mode(Bind_Helper *context)
+#define NJ_MODE_BIND_DECLERATION(mode)  NJ_MODE_BIND_DECLERATION_(mode)
 
 #define NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_bar_active, color_mode, color_mark, color_pop1, color_pop2)     \
 NJ_MODE_STATE_DECLERATION(mode) NJ_MODE_STATE(mode) = {};                                                                                               \
@@ -63,11 +69,6 @@ static void mode_enter_##mode(struct Application_Links *app, int buffer_id){    
     };                                                                                                                                                  \
     set_theme_colors(app, colors, ArrayCount(colors));                                                                                                  \
     NJ_MODE_PRINT_ENTER_HOOK;                                                                                                                           \
-}                                                                                                                                                       \
-CUSTOM_COMMAND_SIG(nj_mode_enter_##mode)                                                                                                                \
-CUSTOM_DOC("Activate " #mode " mode.")                                                                                                                  \
-{                                                                                                                                                       \
-    mode_enter_##mode(app, get_active_view(app, AccessAll).buffer_id);                                                                                  \
 }
 #define NJ_MODE_PRINT_ENTER_FUNCTION(mode, color_bg, color_bar, color_bar_hover, color_bar_active, color_mode, color_mark, color_pop1, color_pop2)      \
 NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_bar_active, color_mode, color_mark, color_pop1, color_pop2)
@@ -133,7 +134,7 @@ static Named_Mapping nj_named_maps_values[] = {
     NJ_GEN_NAMED_BINDINGS(normal)
         NJ_MODES(NJ_GEN_NAMED_BINDINGS)
 };
-#undef NJ_GEN_MODE_KEYMAP
+#undef NJ_GEN_NAMED_BINDINGS
 
 inline void nj_activate_mode_by_mapid(Application_Links *app, NJ_Mapid mapid){
     switch(mapid)

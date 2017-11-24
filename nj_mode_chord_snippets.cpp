@@ -16,6 +16,43 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              );
 #undef NJ_MODE_PRINT_ENTER_HOOK
 
+CUSTOM_COMMAND_SIG(nj_mode_enter_chord_snippets)
+CUSTOM_DOC("Activates 'chord snippets' mode.")
+{
+    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+}
+
+NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
+    begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+    inherit_map(context, mapid_nomap); 
+    bind(context, 'T', MDFR_NONE, nj_write_todo_then_insert); 
+    bind(context, 'N', MDFR_NONE, nj_write_note_then_insert); 
+    bind(context, 'H', MDFR_NONE, nj_write_hack_then_insert); 
+    bind(context, 'I', MDFR_NONE, nj_write_important_then_insert); 
+    
+    bind(context, '[', MDFR_NONE, nj_open_long_braces_then_insert); 
+    bind(context, '{', MDFR_NONE, nj_open_long_braces_semicolon_then_insert); 
+    bind(context, ']', MDFR_NONE, nj_open_long_braces_semicolon_then_insert); 
+    bind(context, 'b', MDFR_NONE, nj_open_long_braces_break_then_insert); 
+    bind(context, '}', MDFR_NONE, nj_open_long_braces_break_then_insert); 
+    bind(context, 'c', MDFR_NONE, nj_open_long_braces_case_then_insert); 
+    bind(context, 'i', MDFR_NONE, nj_open_long_braces_if_then_insert); 
+    bind(context, 'e', MDFR_NONE, nj_open_long_braces_else_then_insert); 
+    bind(context, 'E', MDFR_NONE, nj_open_long_braces_else_if_then_insert); 
+    bind(context, 'f', MDFR_NONE, nj_open_long_braces_for_then_insert); 
+    bind(context, 'w', MDFR_NONE, nj_open_long_braces_while_then_insert); 
+    bind(context, 's', MDFR_NONE, nj_open_long_braces_switch_then_insert); 
+    
+    bind(context, '0',  MDFR_NONE, nj_write_zero_struct_then_prev); 
+    bind(context, '*',  MDFR_NONE, nj_write_eol_block_then_insert); 
+    bind(context, ';',  MDFR_NONE, nj_write_eol_semicolon_then_prev); 
+    bind(context, '\\', MDFR_NONE, nj_write_eol_backslash_then_prev); 
+    bind(context, '/',  MDFR_NONE, nj_comment_line_then_prev); 
+    bind(context, '#',  MDFR_NONE, nj_include_gaurd_file_then_prev); 
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
+    end_map(context);
+}
+
 
 static void
 nj_write_named_comment_string(Application_Links *app, char *type_string){
@@ -266,36 +303,5 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     exec_command(app, nj_include_gaurd_file);
     exec_command(app, nj_activate_previous_mode);
 }
-
-#define nj_bind_mode_keys_chord_snippets(context) \
-begin_map(context, mapid_chord_snippets); \
-inherit_map(context, mapid_nomap); \
-bind(context, 'T', MDFR_NONE, nj_write_todo_then_insert); \
-bind(context, 'N', MDFR_NONE, nj_write_note_then_insert); \
-bind(context, 'H', MDFR_NONE, nj_write_hack_then_insert); \
-bind(context, 'I', MDFR_NONE, nj_write_important_then_insert); \
-\
-bind(context, '[', MDFR_NONE, nj_open_long_braces_then_insert); \
-bind(context, '{', MDFR_NONE, nj_open_long_braces_semicolon_then_insert); \
-bind(context, ']', MDFR_NONE, nj_open_long_braces_semicolon_then_insert); \
-bind(context, 'b', MDFR_NONE, nj_open_long_braces_break_then_insert); \
-bind(context, '}', MDFR_NONE, nj_open_long_braces_break_then_insert); \
-bind(context, 'c', MDFR_NONE, nj_open_long_braces_case_then_insert); \
-bind(context, 'i', MDFR_NONE, nj_open_long_braces_if_then_insert); \
-bind(context, 'e', MDFR_NONE, nj_open_long_braces_else_then_insert); \
-bind(context, 'E', MDFR_NONE, nj_open_long_braces_else_if_then_insert); \
-bind(context, 'f', MDFR_NONE, nj_open_long_braces_for_then_insert); \
-bind(context, 'w', MDFR_NONE, nj_open_long_braces_while_then_insert); \
-bind(context, 's', MDFR_NONE, nj_open_long_braces_switch_then_insert); \
-\
-bind(context, '0',  MDFR_NONE, nj_write_zero_struct_then_prev); \
-bind(context, '*',  MDFR_NONE, nj_write_eol_block_then_insert); \
-bind(context, ';',  MDFR_NONE, nj_write_eol_semicolon_then_prev); \
-bind(context, '\\', MDFR_NONE, nj_write_eol_backslash_then_prev); \
-bind(context, '/',  MDFR_NONE, nj_comment_line_then_prev); \
-bind(context, '#',  MDFR_NONE, nj_include_gaurd_file_then_prev); \
-bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); \
-end_map(context);
-
 
 #endif // NJ_MODE_CHORD_SNIPPETS_CPP

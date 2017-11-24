@@ -18,6 +18,38 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              );
 #undef NJ_MODE_PRINT_ENTER_HOOK
 
+CUSTOM_COMMAND_SIG(nj_mode_enter_replace)
+CUSTOM_DOC("Activates 'replace' mode.")
+{
+    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+}
+
+NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
+    begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+    bind_vanilla_keys(context, nj_replace_character); 
+    bind(context, ' ', MDFR_SHIFT, write_character); 
+    bind(context, 't', MDFR_NONE, word_complete); 
+    
+    bind(context, key_insert, MDFR_NONE, nj_activate_previous_mode); 
+    bind(context, key_back,   MDFR_NONE, nj_replace_mode_backspace); 
+    
+    bind(context, 'x', MDFR_CTRL, nj_replace_mode_cut); 
+    bind(context, 'X', MDFR_CTRL, nj_replace_mode_cut_line); 
+    bind(context, 'x', MDFR_ALT,  nj_replace_mode_cut_token_or_word); 
+    
+    bind(context, 'e', MDFR_ALT,  nj_replace_mode_snipe_token_or_word); 
+    
+    bind(context, 'v', MDFR_CTRL, nj_replace_mode_paste); 
+    bind(context, 'V', MDFR_CTRL, nj_replace_mode_paste_next); 
+    bind(context, 'p', MDFR_CTRL, nj_replace_mode_paste); 
+    bind(context, 'P', MDFR_CTRL, nj_replace_mode_paste_next); 
+    
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
+    inherit_map(context, mapid_movements); 
+    end_map(context); //mapid_replace
+}
+
+
 CUSTOM_COMMAND_SIG(nj_replace_character)
 CUSTOM_DOC("Replaces the character under the cursor with whatever character was used to trigger this command."){
     uint32_t access = AccessProtected;
@@ -192,31 +224,5 @@ CUSTOM_DOC("TODO"){
         }
     }
 }
-
-
-#define nj_bind_mode_keys_replace(context) \
-begin_map(context, mapid_replace); \
-bind_vanilla_keys(context, nj_replace_character); \
-bind(context, ' ', MDFR_SHIFT, write_character); \
-bind(context, '\t', MDFR_NONE, word_complete); \
-\
-bind(context, key_insert, MDFR_NONE, nj_activate_previous_mode); \
-bind(context, key_back,   MDFR_NONE, nj_replace_mode_backspace); \
-\
-bind(context, 'x', MDFR_CTRL, nj_replace_mode_cut); \
-bind(context, 'X', MDFR_CTRL, nj_replace_mode_cut_line); \
-bind(context, 'x', MDFR_ALT,  nj_replace_mode_cut_token_or_word); \
-\
-bind(context, 'e', MDFR_ALT,  nj_replace_mode_snipe_token_or_word); \
-\
-bind(context, 'v', MDFR_CTRL, nj_replace_mode_paste); \
-bind(context, 'V', MDFR_CTRL, nj_replace_mode_paste_next); \
-bind(context, 'p', MDFR_CTRL, nj_replace_mode_paste); \
-bind(context, 'P', MDFR_CTRL, nj_replace_mode_paste_next); \
-\
-bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); \
-inherit_map(context, mapid_movements); \
-end_map(context); //mapid_replace
-
 
 #endif // NJ_MODE_REPLACE_CPP

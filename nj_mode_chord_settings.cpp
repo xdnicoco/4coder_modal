@@ -16,6 +16,25 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              );
 #undef NJ_MODE_PRINT_ENTER_HOOK
 
+CUSTOM_COMMAND_SIG(nj_mode_enter_chord_settings)
+CUSTOM_DOC("Activates 'chord_settings' mode.")
+{
+    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+}
+
+NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
+    begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+    inherit_map(context, mapid_nomap); 
+    bind(context, 'b', MDFR_NONE, nj_chord_settings_toggle_filebar_then_prev); 
+    bind(context, 's', MDFR_NONE, nj_chord_settings_toggle_scrollbar_then_prev); 
+    bind(context, 'f', MDFR_NONE, nj_chord_settings_toggle_fullscreen_then_prev); 
+    bind(context, 'l', MDFR_NONE, nj_chord_settings_toggle_line_wrap_then_prev); 
+    bind(context, 'v', MDFR_NONE, nj_chord_settings_toggle_virtual_whitespace_then_prev); 
+    bind(context, '?', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev); 
+    bind(context, 'q', MDFR_NONE, exit_4coder); 
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
+    end_map(context);
+}
 
 CUSTOM_COMMAND_SIG(toggle_scrollbar)
 CUSTOM_DOC("Toggles the visibility status of the current view's scrollbar."){
@@ -60,18 +79,5 @@ CUSTOM_DOC("Toggles the visibility status of the current view's whitespace, then
     exec_command(app, toggle_show_whitespace);
     exec_command(app, nj_activate_previous_mode);
 }
-
-#define nj_bind_mode_keys_chord_settings(context) \
-begin_map(context, mapid_chord_settings); \
-inherit_map(context, mapid_nomap); \
-bind(context, 'b', MDFR_NONE, nj_chord_settings_toggle_filebar_then_prev); \
-bind(context, 's', MDFR_NONE, nj_chord_settings_toggle_scrollbar_then_prev); \
-bind(context, 'f', MDFR_NONE, nj_chord_settings_toggle_fullscreen_then_prev); \
-bind(context, 'l', MDFR_NONE, nj_chord_settings_toggle_line_wrap_then_prev); \
-bind(context, 'v', MDFR_NONE, nj_chord_settings_toggle_virtual_whitespace_then_prev); \
-bind(context, '?', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev); \
-bind(context, 'q', MDFR_NONE, exit_4coder); \
-bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); \
-end_map(context); // mapid_insert
 
 #endif // NJ_MODE_CHORD_SETTINGS

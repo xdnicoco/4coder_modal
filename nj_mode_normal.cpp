@@ -4,7 +4,6 @@
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
 #define NJ_MODE_PRINT_ENTER_HOOK
-#if 1
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              0x050f15, // color_bg
                              0x030439, // color_bar
@@ -15,19 +14,101 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              0x03cf0c, // color_pop1
                              0xff0000  // color_pop2
                              );
-#else
-NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
-                             0x050f15, // color_bg
-                             0x032459, // color_bar
-                             0x021f4f, // color_bar_hover
-                             0x053469, // color_bar_active
-                             0x205499, // color_mode
-                             0x0d6695, // color_mark
-                             0x03cf0c, // color_pop1
-                             0xff0000  // color_pop2
-                             );
-#endif
 #undef NJ_MODE_PRINT_ENTER_HOOK
+
+CUSTOM_COMMAND_SIG(nj_mode_enter_normal)
+CUSTOM_DOC("Activates 'normal' mode.")
+{
+    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+}
+
+NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
+    begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+    inherit_map(context, mapid_movements);
+    bind(context, 'e', MDFR_NONE, delete_char); 
+    bind(context, 'E', MDFR_NONE, nj_snipe_token_or_word); 
+    
+    bind(context, 'i', MDFR_NONE, nj_mode_enter_insert); 
+    bind(context, 'I', MDFR_NONE, nj_mode_enter_chord_insert_single); 
+    bind(context, 'a', MDFR_NONE, nj_insert_after); 
+    bind(context, 'A', MDFR_NONE, nj_seek_eol_then_insert); 
+    bind(context, 'o', MDFR_NONE, nj_newline_then_insert_after); 
+    bind(context, 'O', MDFR_NONE, nj_newline_then_insert_before); 
+    
+    bind(context, 'd', MDFR_NONE, duplicate_line); 
+    bind(context, 'D', MDFR_NONE, delete_line); 
+    bind(context, 'x', MDFR_NONE, cut); 
+    bind(context, 'X', MDFR_NONE, nj_cut_line); 
+    bind(context, 'x', MDFR_ALT,  nj_cut_token_or_word); 
+    bind(context, 'c', MDFR_NONE, copy); 
+    bind(context, 'C', MDFR_NONE, nj_copy_line); 
+    bind(context, 'c', MDFR_ALT, nj_copy_token_or_word); 
+    bind(context, 'v', MDFR_NONE, paste); 
+    bind(context, 'V', MDFR_NONE, paste_next_and_indent); 
+    bind(context, 'p', MDFR_NONE, paste_and_indent); 
+    bind(context, 'P', MDFR_NONE, paste_next_and_indent); 
+    
+    bind(context, 'g', MDFR_NONE, nj_mode_enter_chord_goto); 
+    bind(context, 'G', MDFR_NONE, nj_seek_end_of_file); 
+    
+    bind(context, 'z', MDFR_NONE, undo); 
+    bind(context, 'Z', MDFR_NONE, redo); 
+    bind(context, 'u', MDFR_NONE, undo); 
+    bind(context, 'U', MDFR_NONE, redo); 
+    
+    bind(context, 'f', MDFR_NONE, interactive_open_or_new); 
+    bind(context, 'F', MDFR_NONE, open_in_other); 
+    bind(context, 's', MDFR_NONE, save); 
+    
+    bind(context, 'K', MDFR_NONE, kill_buffer); 
+    bind(context, 'u', MDFR_CTRL, interactive_kill_buffer); 
+    bind(context, 'b', MDFR_NONE, interactive_switch_buffer); 
+    
+    bind(context, ' ', MDFR_NONE, set_mark); 
+    bind(context, '_', MDFR_NONE, write_character); 
+    
+    bind(context, 'L', MDFR_ALT, to_lowercase); 
+    bind(context, 'U', MDFR_ALT,  to_uppercase); 
+    
+    bind(context, 'n', MDFR_NONE,  newline_or_goto_position); 
+    bind(context, 'n', MDFR_SHIFT, newline_or_goto_position_same_panel); 
+    
+    bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single); 
+    bind(context, 'R', MDFR_NONE, nj_mode_enter_replace); 
+    
+    bind(context, 'Q', MDFR_NONE, exit_4coder); 
+    
+    bind(context, key_back, MDFR_SHIFT, nj_backspace_line); 
+    
+    bind(context, '\t', MDFR_NONE,  word_complete); 
+    bind(context, '\t', MDFR_CTRL,  auto_tab_range); 
+    bind(context, '\t', MDFR_SHIFT, auto_tab_line_at_cursor); 
+    
+    bind(context, '!', MDFR_NONE, nj_execute_any_cli); 
+    bind(context, '!', MDFR_CTRL, execute_previous_cli); 
+    
+    bind(context, '~', MDFR_NONE, nj_execute_arbitrary_command); 
+    bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command); 
+    bind(context, '.', MDFR_NONE, nj_toggler); 
+    
+    bind(context, '[', MDFR_NONE, highlight_prev_scope_absolute); 
+    bind(context, ']', MDFR_NONE, highlight_next_scope_absolute); 
+    bind(context, '{', MDFR_NONE, place_in_scope); 
+    bind(context, '}', MDFR_NONE, scope_absorb_down); 
+    
+    bind(context, 't', MDFR_NONE,  word_complete); 
+    
+    bind(context, '2', MDFR_NONE, nj_open_matching_file_cpp_current_panel);
+    bind(context, '@', MDFR_NONE, open_matching_file_cpp);
+    bind(context, '3', MDFR_NONE, nj_mode_enter_chord_snippets);
+    bind(context, '4', MDFR_NONE, nj_mode_enter_chord_case);
+    bind(context, '5', MDFR_NONE, nj_decrement_digit_decimal); 
+    bind(context, '%', MDFR_NONE, nj_decrement_digit_hexadecimal); 
+    bind(context, '6', MDFR_NONE, nj_increment_digit_decimal); 
+    bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal); 
+    bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings); 
+    end_map(context);
+}
 
 static void nj_execute_a_cli_command(Application_Links *app, String cmd, String output_buffer_name)
 {
@@ -339,7 +420,7 @@ CUSTOM_DOC("Writes \"->\" under the cursor."){
 }
 
 CUSTOM_COMMAND_SIG(nj_toggler)
-CUSTOM_DOC("Replaces the character under the cursor with a complementory character, for example replaces 0 with 1, replaces . with -> and vice versa etc."){
+CUSTOM_DOC("Replaces the character under the cursor with a complementory character, for example replaces 0 with 1, replaces . with ->, replaces lowercase withh uppercase and vice versa etc."){
     uint32_t access = AccessProtected;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
@@ -727,88 +808,5 @@ CUSTOM_DOC("Copies a single, whole token on or to the left of the cursor."){
     exec_command(app, nj_select_token_or_word);
     exec_command(app, copy);
 }
-
-#define nj_bind_mode_keys_normal(context) \
-begin_map(context, mapid_normal); \
-inherit_map(context, mapid_movements); \
-bind(context, 'e', MDFR_NONE, delete_char); \
-bind(context, 'E', MDFR_NONE, nj_snipe_token_or_word); \
-\
-bind(context, 'i', MDFR_NONE, nj_mode_enter_insert); \
-bind(context, 'I', MDFR_NONE, nj_mode_enter_chord_insert_single); \
-bind(context, 'a', MDFR_NONE, nj_insert_after); \
-bind(context, 'A', MDFR_NONE, nj_seek_eol_then_insert); \
-bind(context, 'o', MDFR_NONE, nj_newline_then_insert_after); \
-bind(context, 'O', MDFR_NONE, nj_newline_then_insert_before); \
-\
-bind(context, 'd', MDFR_NONE, duplicate_line); \
-bind(context, 'D', MDFR_NONE, delete_line); \
-bind(context, 'x', MDFR_NONE, cut); \
-bind(context, 'X', MDFR_NONE, nj_cut_line); \
-bind(context, 'x', MDFR_ALT,  nj_cut_token_or_word); \
-bind(context, 'c', MDFR_NONE, copy); \
-bind(context, 'C', MDFR_NONE, nj_copy_line); \
-bind(context, 'c', MDFR_ALT, nj_copy_token_or_word); \
-bind(context, 'v', MDFR_NONE, paste); \
-bind(context, 'V', MDFR_NONE, paste_next_and_indent); \
-bind(context, 'p', MDFR_NONE, paste_and_indent); \
-bind(context, 'P', MDFR_NONE, paste_next_and_indent); \
-\
-bind(context, 'g', MDFR_NONE, nj_mode_enter_chord_goto); \
-bind(context, 'G', MDFR_NONE, nj_seek_end_of_file); \
-\
-bind(context, 'z', MDFR_NONE, undo); \
-bind(context, 'Z', MDFR_NONE, redo); \
-bind(context, 'u', MDFR_NONE, undo); \
-bind(context, 'U', MDFR_NONE, redo); \
-\
-bind(context, 'f', MDFR_NONE, interactive_open_or_new); \
-bind(context, 'F', MDFR_NONE, open_in_other); \
-bind(context, 's', MDFR_NONE, save); \
-\
-bind(context, 'K', MDFR_NONE, kill_buffer); \
-bind(context, 'u', MDFR_CTRL, interactive_kill_buffer); \
-bind(context, 'b', MDFR_NONE, interactive_switch_buffer); \
-\
-bind(context, ' ', MDFR_NONE, set_mark); \
-bind(context, '_', MDFR_NONE, write_character); \
-\
-bind(context, 'L', MDFR_ALT, to_lowercase); \
-bind(context, 'U', MDFR_ALT,  to_uppercase); \
-\
-bind(context, '\n', MDFR_NONE,  newline_or_goto_position); \
-bind(context, '\n', MDFR_SHIFT, newline_or_goto_position_same_panel); \
-\
-bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single); \
-bind(context, 'R', MDFR_NONE, nj_mode_enter_replace); \
-\
-bind(context, 'Q', MDFR_NONE, exit_4coder); \
-\
-bind(context, key_back, MDFR_SHIFT, nj_backspace_line); \
-\
-bind(context, '!', MDFR_NONE, nj_execute_any_cli); \
-bind(context, '!', MDFR_CTRL, execute_previous_cli); \
-\
-bind(context, '~', MDFR_NONE, nj_execute_arbitrary_command); \
-bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command); \
-bind(context, '.', MDFR_NONE, nj_toggler); \
-\
-bind(context, '[', MDFR_NONE, highlight_prev_scope_absolute); \
-bind(context, ']', MDFR_NONE, highlight_next_scope_absolute); \
-bind(context, '{', MDFR_NONE, place_in_scope); \
-bind(context, '}', MDFR_NONE, scope_absorb_down); \
-\
-bind(context, '\t', MDFR_NONE,  word_complete); \
-\
-bind(context, '2', MDFR_NONE, nj_open_matching_file_cpp_current_panel);\
-bind(context, '@', MDFR_NONE, open_matching_file_cpp);\
-bind(context, '3', MDFR_NONE, nj_mode_enter_chord_snippets);\
-bind(context, '4', MDFR_NONE, nj_mode_enter_chord_case);\
-bind(context, '5', MDFR_NONE, nj_decrement_digit_decimal); \
-bind(context, '%', MDFR_NONE, nj_decrement_digit_hexadecimal); \
-bind(context, '6', MDFR_NONE, nj_increment_digit_decimal); \
-bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal); \
-bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings); \
-end_map(context);
 
 #endif // NJ_MODE_NORMAL_CPP
