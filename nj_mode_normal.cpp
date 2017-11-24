@@ -1,0 +1,814 @@
+#if !defined(NJ_MODE_NORMAL_CPP)
+#define NJ_MODE_NORMAL_CPP
+
+struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
+
+#define NJ_MODE_PRINT_ENTER_HOOK
+#if 1
+NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
+                             0x050f15, // color_bg
+                             0x030439, // color_bar
+                             0x020f2f, // color_bar_hover
+                             0x051449, // color_bar_active
+                             0x104489, // color_mode
+                             0x0d6695, // color_mark
+                             0x03cf0c, // color_pop1
+                             0xff0000  // color_pop2
+                             );
+#else
+NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
+                             0x050f15, // color_bg
+                             0x032459, // color_bar
+                             0x021f4f, // color_bar_hover
+                             0x053469, // color_bar_active
+                             0x205499, // color_mode
+                             0x0d6695, // color_mark
+                             0x03cf0c, // color_pop1
+                             0xff0000  // color_pop2
+                             );
+#endif
+#undef NJ_MODE_PRINT_ENTER_HOOK
+
+static void nj_execute_a_cli_command(Application_Links *app, String cmd, String output_buffer_name)
+{
+    String hot_directory = make_fixed_width_string(hot_directory_space);
+    hot_directory.size = directory_get_hot(app, hot_directory.str, hot_directory.memory_size);
+    
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    
+    exec_system_command(app, &view, buffer_identifier(output_buffer_name.str, output_buffer_name.size), hot_directory.str, hot_directory.size, cmd.str, cmd.size, CLI_OverlapWithConflict | CLI_CursorAtEnd);
+    lock_jump_buffer(output_buffer_name.str, output_buffer_name.size);
+}
+
+CUSTOM_COMMAND_SIG(nj_execute_any_cli)
+CUSTOM_DOC("Queries for a system command, runs the system command as a CLI and prints the output to a buffer named after the command."){
+    Query_Bar bar_cmd = {0};
+    
+    bar_cmd.prompt = make_lit_string("Shell: ");
+    bar_cmd.string = make_fixed_width_string(command_space);
+    if (!query_user_string(app, &bar_cmd)) return;
+    
+    char output_buffer_name_space[256] = {"*shell: "};
+    String output_buffer_name = make_string_cap(output_buffer_name_space, str_size(output_buffer_name_space), 256);
+    append_partial_ss(&output_buffer_name, bar_cmd.string);
+    replace_char(&output_buffer_name, '\\', '#');
+    replace_char(&output_buffer_name, '/',  '#');
+    append_s_char(&output_buffer_name, '*');
+    
+    nj_execute_a_cli_command(app, bar_cmd.string, output_buffer_name);
+}
+
+CUSTOM_COMMAND_SIG(nj_execute_arbitrary_command)
+CUSTOM_DOC("Execute a 'long form' command.")
+{
+    // NOTE(allen): This isn't a super powerful version of this command, I will expand
+    // upon it so that it has all the cmdid_* commands by default.  However, with this
+    // as an example you have everything you need to make it work already. You could
+    // even use app->memory to create a hash table in the start hook.
+    Query_Bar bar = {0};
+    char space[1024];
+    bar.prompt = make_lit_string("Command: ");
+    bar.string = make_fixed_width_string(space);
+    
+    if (!query_user_string(app, &bar)) return;
+    
+    // NOTE(allen): Here I chose to end this query bar because when I call another
+    // command it might ALSO have query bars and I don't want this one hanging
+    // around at that point.  Since the bar exists on my stack the result of the query
+    // is still available in bar.string though.
+    end_query_bar(app, &bar, 0);
+    
+    if (match_ss(bar.string, make_lit_string("load project"))){
+        load_project(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("open all code"))){
+        open_all_code(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("open all code recursive"))){
+        open_all_code_recursive(app);
+    }
+    else if(match_ss(bar.string, make_lit_string("close all code"))){
+        close_all_code(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("dos lines")) ||
+             match_ss(bar.string, make_lit_string("dosify"))){
+        eol_dosify(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("nix lines")) ||
+             match_ss(bar.string, make_lit_string("nixify"))){
+        eol_nixify(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("remap")) ||
+             match_ss(bar.string, make_lit_string("mode"))){
+        remap_interactive(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("new project"))){
+        setup_new_project(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("delete file")) ||
+             match_ss(bar.string, make_lit_string("rm"))){
+        delete_file_query(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("rename file")) ||
+             match_ss(bar.string, make_lit_string("mv"))){
+        rename_file_query(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("mkdir"))){
+        make_directory_query(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("wq"))){
+        exec_command(app, save);
+        exec_command(app, exit_4coder);
+    }
+    else if (match_ss(bar.string, make_lit_string("w"))){
+        exec_command(app, save);
+    }
+    else if (match_ss(bar.string, make_lit_string("q"))){
+        exec_command(app, exit_4coder);
+    }
+    else{
+        bool32 command_sig_found = false;
+        replace_char(&bar.string, ' ', '_');
+        for(int32_t i = 0;
+            i < command_one_past_last_id;
+            ++i)
+        {
+            if(match_sc(bar.string, fcoder_metacmd_table[i].name))
+            {
+                command_sig_found = true;
+                exec_command(app, fcoder_metacmd_table[i].proc);
+                break;
+            }
+        }
+        if(!command_sig_found)
+        {
+            print_message(app, literal("unrecognized command: "));
+            print_message(app, bar.string.str, bar.string.size);
+            print_message(app, literal("\n"));
+        }
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_duplicate_line)
+CUSTOM_DOC("Duplicates the line under the cursor."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    int32_t min = seek_line_beginning(app, &buffer, view.cursor.pos);
+    int32_t max = seek_line_end(app, &buffer, view.cursor.pos) + 1;
+    int32_t size = max - min;
+    if (size + 1 <= app->memory_size){
+        char *mem = (char*)app->memory;
+        mem[0] = '\n';
+        
+        buffer_read_range(app, &buffer, min, max, mem + 1);
+        
+        write_string(app, make_string(mem, sizeof(char)*(size + 1)));
+    }
+}
+
+void nj_ocd(Application_Links *app, char *seek, int32_t len){
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    int32_t min_line_index;
+    int32_t max_line_index;
+    if(view.cursor.line > view.mark.line){
+        min_line_index = view.mark.line;
+        max_line_index = view.cursor.line;
+    } else {
+        min_line_index = view.cursor.line;
+        max_line_index = view.mark.line;
+    }
+    
+    int32_t line_count = max_line_index - min_line_index + 1;
+    Buffer_Seek *positions = (Buffer_Seek *)malloc(line_count*sizeof(Buffer_Seek));
+    
+    int32_t max_position = 0;
+    int32_t min_position = INT32_MAX;
+    for(int32_t line_index = 0; line_index < line_count; ++line_index)
+    {
+        int32_t abs_line_index = min_line_index + line_index;
+        int32_t start = buffer_get_line_start(app, &buffer, seek_line_char(abs_line_index, 0).pos);
+        int32_t end = buffer_get_line_end(app, &buffer, seek_line_char(abs_line_index, 0).pos) + 1;
+        
+        int32_t line_size = end - start;
+        Partition *part = &global_part;
+        String current_line = {0};
+        read_line(app, part, &buffer, abs_line_index, &current_line);
+        
+        i32_4tech position = find_substr_s(current_line, 0, make_string(seek, len));
+        
+        if(position < line_size-1){
+            *(positions + line_index) = seek_line_char(abs_line_index, position);
+            if(position > max_position){
+                max_position = position;
+            } 
+            else if (position < min_position){
+                min_position = position;
+            }
+        }
+        else {
+            (positions + line_index)->type = 0;
+        }
+    }
+    
+    if (max_position - min_position + 1 <= app->memory_size){
+        char *mem = (char*)app->memory;
+        for(int32_t c_index = 0; c_index < (max_position - min_position + 1); ++c_index){
+            *(mem + c_index) = ' ';
+        }
+        
+        for(int32_t line_index = 0; line_index < line_count; ++line_index)
+        {
+            Buffer_Seek *position = positions + line_index;
+            
+            // 
+            // char msg_pos[256];
+            // sprintf(msg_pos, "inserting space in position: L#%d C#%d T#%d\n", position->line, position->character, position->type);
+            // print_message(app, msg_pos, str_size(msg_pos));
+            // 
+            
+            if(position->type != 0){
+                int32_t num_spaces = max_position - position->character;
+                
+                Partial_Cursor cursor;
+                if(buffer_compute_cursor(app, &buffer, *position, &cursor)){
+                    buffer_replace_range(app, &buffer, cursor.pos + 1, cursor.pos + 1, mem, sizeof(char)*num_spaces);
+                }
+            }
+        }
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_ocd_equals)
+CUSTOM_DOC("Aligns the first '=' character to be on the same column of every line in the range."){
+    nj_ocd(app, "=", 1);
+}
+
+CUSTOM_COMMAND_SIG(nj_ocd_arbitrary)
+CUSTOM_DOC("Queries for an arbitrary character, then aligns it to be on the same column of every line in the range."){
+    Query_Bar align;
+    char align_space[1024];
+    align.prompt = make_lit_string("OCD by: ");
+    align.string = make_fixed_width_string(align_space);
+    
+    if (query_user_string(app, &align)) {
+        nj_ocd(app, align.string.str, align.string.size);
+    }
+}
+
+void nj_replace_rectangle_function(Application_Links *app, char *str, int32_t len){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range range = get_range(&view);
+    int32_t min_line_index;
+    int32_t max_line_index;
+    if(view.cursor.line > view.mark.line){
+        min_line_index = view.mark.line;
+        max_line_index = view.cursor.line;
+    } else {
+        min_line_index = view.cursor.line;
+        max_line_index = view.mark.line;
+    }
+    int32_t min_char_index;
+    int32_t max_char_index;
+    if(view.cursor.character > view.mark.character){
+        min_char_index = view.mark.character;
+        max_char_index = view.cursor.character;
+    } else {
+        min_char_index = view.cursor.character;
+        max_char_index = view.mark.character;
+    }
+    
+    int32_t line_count = max_line_index - min_line_index;
+    
+    for(int32_t i = 0;
+        i <= line_count;
+        ++i)
+    {
+        Buffer_Seek min_seek = seek_line_char(min_line_index + i, min_char_index);
+        Buffer_Seek max_seek = seek_line_char(min_line_index + i, max_char_index);
+        
+        Partial_Cursor min_cursor, max_cursor;
+        if(buffer_compute_cursor(app, &buffer, min_seek, &min_cursor) &&
+           buffer_compute_cursor(app, &buffer, max_seek, &max_cursor))
+        {
+            buffer_replace_range(app, &buffer, min_cursor.pos, max_cursor.pos, str, len);
+        }
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_delete_rectangle)
+CUSTOM_DOC("Deletes the range in a rectangular fashion."){
+    nj_replace_rectangle_function(app, 0, 0);
+}
+
+CUSTOM_COMMAND_SIG(nj_replace_rectangle)
+CUSTOM_DOC("Replaces the range in a rectangular fashion."){
+    Query_Bar with;
+    char with_space[1024];
+    with.prompt = make_lit_string("With: ");
+    with.string = make_fixed_width_string(with_space);
+    
+    if (query_user_string(app, &with)) {
+        nj_replace_rectangle_function(app, with.string.str, with.string.size);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_exchange_mark_and_cursor)
+CUSTOM_DOC("Exchanges the mark and the curser positions."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    
+    uint32_t cursor_pos = view.cursor.pos;
+    uint32_t mark_pos = view.mark.pos;
+    
+    view_set_mark(app, &view, seek_pos(cursor_pos));
+    view_set_cursor(app, &view, seek_pos(mark_pos), 1);
+}
+
+CUSTOM_COMMAND_SIG(nj_write_arrow)
+CUSTOM_DOC("Writes \"->\" under the cursor."){
+    write_string(app, make_lit_string("->"));
+}
+
+CUSTOM_COMMAND_SIG(nj_toggler)
+CUSTOM_DOC("Replaces the character under the cursor with a complementory character, for example replaces 0 with 1, replaces . with -> and vice versa etc."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t pos = view.cursor.pos;
+    char c = buffer_get_char(app, &buffer, pos);
+    switch(c){
+        case '.': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "->", 2);
+        } break;
+        
+        case '-': {
+            if(buffer_get_char(app, &buffer, pos + 1) == '>'){
+                buffer_replace_range(app, &buffer, pos, pos + 2, ".", 1);
+            }
+            else
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 1, "+", 1);
+            }
+        } break;
+        
+        case '+': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "-", 1);
+        } break;
+        
+        case '=': {
+            if(buffer_get_char(app, &buffer, pos + 1) == '=')
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 2, "!=", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '='){
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "!=", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '!')
+            {
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "==", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '<')
+            {
+                if(buffer_get_char(app, &buffer, pos - 2) == '<')
+                {
+                    buffer_replace_range(app, &buffer, pos - 2, pos + 1, ">>=", 3);
+                }
+                else
+                {
+                    buffer_replace_range(app, &buffer, pos - 1, pos + 1, ">=", 2);
+                }
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '>')
+            {
+                if(buffer_get_char(app, &buffer, pos - 2) == '>')
+                {
+                    buffer_replace_range(app, &buffer, pos - 2, pos + 1, "<<=", 3);
+                }
+                else
+                {
+                    buffer_replace_range(app, &buffer, pos - 1, pos + 1, "<=", 2);
+                }
+            }
+        } break;
+        
+        case '!': {
+            if(buffer_get_char(app, &buffer, pos + 1) == '=')
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 2, "==", 2);
+            }
+        } break;
+        
+        case '<': {
+            if(buffer_get_char(app, &buffer, pos - 1) == '<')
+            {
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, ">>", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '<')
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 2, ">>", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '=')
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 2, ">=", 2);
+            }
+            else
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 1, ">", 1);
+            }
+        } break;
+        
+        case '>': {
+            if(buffer_get_char(app, &buffer, pos - 1) == '-'){
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, ".", 1);
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '>')
+            {
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "<<", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '>')
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 2, "<<", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '=')
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 2, "<=", 2);
+            }
+            else
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 1, "<", 1);
+            }
+        } break;
+        
+        case '0': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "1", 1);
+        } break;
+        
+        case '1': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "0", 1);
+        } break;
+        
+        case '|': {
+            if(buffer_get_char(app, &buffer, pos - 1) == '|'){
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "&&", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '|'){
+                buffer_replace_range(app, &buffer, pos, pos + 2, "&&", 2);
+            }
+            else
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 1, "&", 1);
+            }
+        } break;
+        
+        case '&': {
+            if(buffer_get_char(app, &buffer, pos - 1) == '&'){
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "||", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '&'){
+                buffer_replace_range(app, &buffer, pos, pos + 2, "||", 2);
+            }
+            else
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 1, "|", 1);
+            }
+        } break;
+        
+        case '\\': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "/", 1);
+        } break;
+        
+        case '/': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "\\", 1);
+        } break;
+        
+        case ' ': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, "_", 1);
+        } break;
+        
+        case '_': {
+            buffer_replace_range(app, &buffer, pos, pos + 1, " ", 1);
+        } break;
+        
+        default: {
+            if(char_is_upper(c))
+            {
+                char c_new[1] = {char_to_lower(c)};
+                buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
+            }
+            else if(char_is_lower(c))
+            {
+                char c_new[1] = {char_to_upper(c)};
+                buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
+            }
+        }break;
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_increment_digit_decimal)
+CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back to 0."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t pos = view.cursor.pos;
+    char c = buffer_get_char(app, &buffer, pos);
+    if(char_is_numeric(c)){
+        i32_4tech digit = hexchar_to_int(c)+1;
+        while(digit >= 10) digit -= 10;
+        char c_new[1] = {int_to_hexchar(digit)};
+        buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_decrement_digit_decimal)
+CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back to 9."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t pos = view.cursor.pos;
+    char c = buffer_get_char(app, &buffer, pos);
+    if(char_is_numeric(c)){
+        i32_4tech digit = hexchar_to_int(c)-1;
+        while(digit < 0) digit += 10;
+        char c_new[1] = {int_to_hexchar(digit)};
+        buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_increment_digit_hexadecimal)
+CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back to 0."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t pos = view.cursor.pos;
+    char c = buffer_get_char(app, &buffer, pos);
+    if(char_is_hex(c)){
+        i32_4tech digit = hexchar_to_int(c)+1;
+        while(digit >= 16) digit -= 16;
+        char c_new[1] = {int_to_hexchar(digit%16)};
+        buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_decrement_digit_hexadecimal)
+CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back to 9."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t pos = view.cursor.pos;
+    char c = buffer_get_char(app, &buffer, pos);
+    if(char_is_hex(c)){
+        i32_4tech digit = hexchar_to_int(c)-1;
+        while(digit < 0) digit += 16;
+        char c_new[1] = {int_to_hexchar(digit)};
+        buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_open_matching_file_cpp_current_panel)
+CUSTOM_DOC("If the current file is a *.cpp or *.h, attempts to open the corresponding *.h or *.cpp file in the current view."){
+    View_Summary view = get_active_view(app, AccessAll);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessAll);
+    
+    Buffer_Summary new_buffer = {0};
+    if (get_cpp_matching_file(app, buffer, &new_buffer)){
+        //get_view_next_looped(app, &view, AccessAll);
+        view_set_buffer(app, &view, new_buffer.buffer_id, 0);
+        //set_active_view(app, &view);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_seek_end_of_file)
+CUSTOM_DOC("Places the cursor at the end of the buffer."){
+    uint32_t access = AccessProtected;
+    
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    view_set_cursor(app, &view, seek_pos(buffer.size), 1);
+}
+
+CUSTOM_COMMAND_SIG(nj_seek_beginning_of_file)
+CUSTOM_DOC("Places the cursor at the beggining of the buffer."){
+    View_Summary view = get_active_view(app, AccessProtected);
+    
+    view_set_cursor(app, &view, seek_pos(0), 1);
+}
+
+CUSTOM_COMMAND_SIG(nj_backspace_line)
+CUSTOM_DOC("Concatinates the current line with the one before it, adding a space between them."){
+    seek_beginning_of_textual_line(app);
+    backspace_char(app);
+    
+    write_string(app, make_lit_string(" "));
+}
+
+
+CUSTOM_COMMAND_SIG(nj_backspace_word)
+CUSTOM_DOC("Delete characters between the cursor position and the first alphanumeric or cammel boundary to the left.")
+{
+    uint32_t access = AccessOpen;
+    
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    if (buffer.exists){
+        int32_t pos2 = 0, pos1 = 0;
+        
+        pos2 = view.cursor.pos;
+        exec_command(app, seek_alphanumeric_or_camel_left);
+        refresh_view(app, &view);
+        pos1 = view.cursor.pos;
+        
+        buffer_replace_range(app, &buffer, pos1, pos2, 0, 0);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_delete_word)
+CUSTOM_DOC("Delete characters between the cursor position and the first alphanumeric or cammel boundary to the right."){
+    uint32_t access = AccessOpen;
+    
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    if (buffer.exists){
+        int32_t pos2 = 0, pos1 = 0;
+        
+        pos1 = view.cursor.pos;
+        exec_command(app, seek_alphanumeric_or_camel_right);
+        refresh_view(app, &view);
+        pos2 = view.cursor.pos;
+        
+        buffer_replace_range(app, &buffer, pos1, pos2, 0, 0);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_delete_line)
+CUSTOM_DOC("Deletes the line under the cursor."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    int32_t min = seek_line_beginning(app, &buffer, view.cursor.pos);
+    int32_t max = seek_line_end(app, &buffer, view.cursor.pos) + 1;
+    
+    buffer_replace_range(app, &buffer, min, max, 0, 0);
+}
+
+CUSTOM_COMMAND_SIG(nj_cut_line)
+CUSTOM_DOC("Cuts the line under the cursor."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    view_set_mark(app, &view, seek_line_char(view.cursor.line, 0));
+    view_set_cursor(app, &view, seek_pos(seek_line_end(app, &buffer, view.cursor.pos) + 1), 1);
+    
+    exec_command(app, cut);
+}
+
+CUSTOM_COMMAND_SIG(nj_copy_line)
+CUSTOM_DOC("Copies the line under the cursor."){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    view_set_mark(app, &view, seek_line_char(view.cursor.line, 0));
+    view_set_cursor(app, &view, seek_pos(seek_line_end(app, &buffer, view.cursor.pos) + 1), 1);
+    
+    copy(app);
+}
+
+
+CUSTOM_COMMAND_SIG(nj_select_token_or_word)
+CUSTOM_DOC("Select a single, whole token on or to the left of the cursor."){
+    uint32_t access = AccessProtected;
+    
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    int32_t pos1 = buffer_boundary_seek(app, &buffer, view.cursor.pos+1, 0, BoundaryToken | BoundaryWhitespace);
+    int32_t pos2 = buffer_boundary_seek(app, &buffer, pos1,            1, BoundaryToken | BoundaryWhitespace);
+    
+    view_set_mark(app, &view, seek_pos(pos1));
+    view_set_cursor(app, &view, seek_pos(pos2), 1);
+}
+
+CUSTOM_COMMAND_SIG(nj_snipe_token_or_word)
+CUSTOM_DOC("Delete a single, whole token on or to the left of the cursor."){
+    uint32_t access = AccessOpen;
+    
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    int32_t pos1 = buffer_boundary_seek(app, &buffer, view.cursor.pos+1, 0, BoundaryToken | BoundaryWhitespace);
+    int32_t pos2 = buffer_boundary_seek(app, &buffer, pos1,            1, BoundaryToken | BoundaryWhitespace);
+    
+    Range range = make_range(pos1, pos2);
+    buffer_replace_range(app, &buffer, range.start, range.end, 0, 0);
+}
+
+CUSTOM_COMMAND_SIG(nj_cut_token_or_word)
+CUSTOM_DOC("Cuts a single, whole token on or to the left of the cursor."){
+    exec_command(app, nj_select_token_or_word);
+    exec_command(app, cut);
+}
+
+CUSTOM_COMMAND_SIG(nj_copy_token_or_word)
+CUSTOM_DOC("Copies a single, whole token on or to the left of the cursor."){
+    exec_command(app, nj_select_token_or_word);
+    exec_command(app, copy);
+}
+
+#define nj_bind_mode_keys_normal(context) \
+begin_map(context, mapid_normal); \
+inherit_map(context, mapid_movements); \
+bind(context, 'e', MDFR_NONE, delete_char); \
+bind(context, 'E', MDFR_NONE, nj_snipe_token_or_word); \
+\
+bind(context, 'i', MDFR_NONE, nj_mode_enter_insert); \
+bind(context, 'I', MDFR_NONE, nj_mode_enter_chord_insert_single); \
+bind(context, 'a', MDFR_NONE, nj_insert_after); \
+bind(context, 'A', MDFR_NONE, nj_seek_eol_then_insert); \
+bind(context, 'o', MDFR_NONE, nj_newline_then_insert_after); \
+bind(context, 'O', MDFR_NONE, nj_newline_then_insert_before); \
+\
+bind(context, 'd', MDFR_NONE, duplicate_line); \
+bind(context, 'D', MDFR_NONE, delete_line); \
+bind(context, 'x', MDFR_NONE, cut); \
+bind(context, 'X', MDFR_NONE, nj_cut_line); \
+bind(context, 'x', MDFR_ALT,  nj_cut_token_or_word); \
+bind(context, 'c', MDFR_NONE, copy); \
+bind(context, 'C', MDFR_NONE, nj_copy_line); \
+bind(context, 'c', MDFR_ALT, nj_copy_token_or_word); \
+bind(context, 'v', MDFR_NONE, paste); \
+bind(context, 'V', MDFR_NONE, paste_next_and_indent); \
+bind(context, 'p', MDFR_NONE, paste_and_indent); \
+bind(context, 'P', MDFR_NONE, paste_next_and_indent); \
+\
+bind(context, 'g', MDFR_NONE, nj_mode_enter_chord_goto); \
+bind(context, 'G', MDFR_NONE, nj_seek_end_of_file); \
+\
+bind(context, 'z', MDFR_NONE, undo); \
+bind(context, 'Z', MDFR_NONE, redo); \
+bind(context, 'u', MDFR_NONE, undo); \
+bind(context, 'U', MDFR_NONE, redo); \
+\
+bind(context, 'f', MDFR_NONE, interactive_open_or_new); \
+bind(context, 'F', MDFR_NONE, open_in_other); \
+bind(context, 's', MDFR_NONE, save); \
+\
+bind(context, 'K', MDFR_NONE, kill_buffer); \
+bind(context, 'u', MDFR_CTRL, interactive_kill_buffer); \
+bind(context, 'b', MDFR_NONE, interactive_switch_buffer); \
+\
+bind(context, ' ', MDFR_NONE, set_mark); \
+bind(context, '_', MDFR_NONE, write_character); \
+\
+bind(context, 'L', MDFR_ALT, to_lowercase); \
+bind(context, 'U', MDFR_ALT,  to_uppercase); \
+\
+bind(context, '\n', MDFR_NONE,  newline_or_goto_position); \
+bind(context, '\n', MDFR_SHIFT, newline_or_goto_position_same_panel); \
+\
+bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single); \
+bind(context, 'R', MDFR_NONE, nj_mode_enter_replace); \
+\
+bind(context, 'Q', MDFR_NONE, exit_4coder); \
+\
+bind(context, key_back, MDFR_SHIFT, nj_backspace_line); \
+\
+bind(context, '!', MDFR_NONE, nj_execute_any_cli); \
+bind(context, '!', MDFR_CTRL, execute_previous_cli); \
+\
+bind(context, '~', MDFR_NONE, nj_execute_arbitrary_command); \
+bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command); \
+bind(context, '.', MDFR_NONE, nj_toggler); \
+\
+bind(context, '[', MDFR_NONE, highlight_prev_scope_absolute); \
+bind(context, ']', MDFR_NONE, highlight_next_scope_absolute); \
+bind(context, '{', MDFR_NONE, place_in_scope); \
+bind(context, '}', MDFR_NONE, scope_absorb_down); \
+\
+bind(context, '\t', MDFR_NONE,  word_complete); \
+\
+bind(context, '2', MDFR_NONE, nj_open_matching_file_cpp_current_panel);\
+bind(context, '@', MDFR_NONE, open_matching_file_cpp);\
+bind(context, '3', MDFR_NONE, nj_mode_enter_chord_snippets);\
+bind(context, '4', MDFR_NONE, nj_mode_enter_chord_case);\
+bind(context, '5', MDFR_NONE, nj_decrement_digit_decimal); \
+bind(context, '%', MDFR_NONE, nj_decrement_digit_hexadecimal); \
+bind(context, '6', MDFR_NONE, nj_increment_digit_decimal); \
+bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal); \
+bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings); \
+end_map(context);
+
+#endif // NJ_MODE_NORMAL_CPP
