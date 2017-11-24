@@ -1,17 +1,16 @@
-# 4coder Modal Cusomization Layer
+# 4coder Modal Customization Layer
 This is my customization layer of 4coder super in the journey to a modal future.
-I took some elements from emacs, and some elements from vim, and added my own functions and functionality to create a highly customzied modal system.
+I took some elements from emacs, and some elements from vim, and added my own functions and functionality to create a highly customized modal system.
 
 Tested only on 4coder 2.24.
 
-# Feaures
-## Major modes
+Major modes:
 * Normal  mode: Home mode for all the editing commands, the "home" that starts with 4coder.
-* Insert  mode: Text insertation mode, remaps all the keys to writing their respective characters.
+* Insert  mode: Text insertion mode, remaps all the keys to writing their respective characters.
 * Replace mode: Text replacement mode, replaces the text under the cursor. Mostly buggy.
 
-# Insallaion
-## WARNING: This is my private prefered custom layer, it is not supported by Allen nor by me, and it's purpose is to and to share my customization code as an example.
+# Installaion
+### WARNING: This is my private custom layer, it is not supported by Allen nor by me, and it's purpose is to and to share my customization code as an example.
 Support [Allen Webster on Patreon](https://www.patreon.com/mr4thdimention/) clone the repository into your 4coder directory and edit 4coder_default_bindings to the following:
 ```#if !defined(FCODER_DEFAULT_BINDINGS)
 #define FCODER_DEFAULT_BINDINGS
