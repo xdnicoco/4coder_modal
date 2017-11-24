@@ -31,6 +31,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'U', MDFR_NONE, nj_chord_case_upper); 
     bind(context, 'c', MDFR_NONE, nj_chord_case_camel_token_or_word); 
     bind(context, 'C', MDFR_NONE, nj_chord_case_camel); 
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
     end_map(context); // mapid_insert
 }
 

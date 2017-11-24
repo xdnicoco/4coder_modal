@@ -162,7 +162,8 @@ nj_keys(Bind_Helper *context){
     begin_map(context, mapid_common);
     bind(context, key_f4, MDFR_ALT,  exit_4coder);
     bind(context, 'q',    MDFR_CTRL, exit_4coder);
-    bind(context, ' ', MDFR_ALT,   nj_activate_previous_mode);
+    
+    bind(context, ' ', MDFR_ALT, nj_toggler);
     
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
     bind(context, key_f1, MDFR_CTRL, open_color_tweaker);
@@ -225,8 +226,8 @@ nj_keys(Bind_Helper *context){
     
     bind(context, ' ',  MDFR_CTRL, set_mark);
     bind(context, ';',  MDFR_CTRL, cursor_mark_swap);
-    bind(context, ';',  MDFR_ALT,  nj_write_eol_semicolon);
-    bind(context, '\\', MDFR_ALT,  nj_write_eol_backslash);
+    bind(context, ';',  MDFR_ALT,  nj_chord_snippet_eol_semicolon);
+    bind(context, '\\', MDFR_ALT,  nj_chord_snippet_eol_backslash);
     bind(context, 'c',  MDFR_CTRL, copy);
     bind(context, '2',  MDFR_ALT,  nj_open_matching_file_cpp_current_panel);
     bind(context, '@',  MDFR_ALT,  open_matching_file_cpp);
@@ -373,8 +374,8 @@ nj_keys(Bind_Helper *context){
     end_map(context); // mapid_movements
     
 #define NJ_GEN_MODE_KEYMAP(mode) nj_bind_mode_keys_##mode(context);
-    NJ_GEN_MODE_KEYMAP(normal);
-    NJ_MODES(NJ_GEN_MODE_KEYMAP);
+    NJ_GEN_MODE_KEYMAP(normal)
+        NJ_MODES(NJ_GEN_MODE_KEYMAP)
 #undef NJ_GEN_MODE_KEYMAP
 }
 

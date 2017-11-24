@@ -70,8 +70,8 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'L', MDFR_ALT, to_lowercase); 
     bind(context, 'U', MDFR_ALT,  to_uppercase); 
     
-    bind(context, 'n', MDFR_NONE,  newline_or_goto_position); 
-    bind(context, 'n', MDFR_SHIFT, newline_or_goto_position_same_panel); 
+    bind(context, '\n', MDFR_NONE,  newline_or_goto_position); 
+    bind(context, '\n', MDFR_SHIFT, newline_or_goto_position_same_panel); 
     
     bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single); 
     bind(context, 'R', MDFR_NONE, nj_mode_enter_replace); 
@@ -163,7 +163,8 @@ CUSTOM_DOC("Execute a 'long form' command.")
     if (match_ss(bar.string, make_lit_string("load project"))){
         load_project(app);
     }
-    else if (match_ss(bar.string, make_lit_string("open all code"))){
+    else if (match_ss(bar.string, make_lit_string("open all code")) ||
+             match_ss(bar.string, make_lit_string("open *"))){
         open_all_code(app);
     }
     else if (match_ss(bar.string, make_lit_string("open all code recursive"))){
