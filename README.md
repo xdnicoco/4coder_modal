@@ -1,20 +1,24 @@
-# 4coder_modal
+# 4coder Modal Cusomization Layer
 This is my customization layer of 4coder super in the journey to a modal future.
 I took some elements from emacs, and some elements from vim, and added my own functions and functionality to create a highly customzied modal system.
 
 Tested only on 4coder 2.24.
 
-To activate this customization, support [Allen Webster on Patreon](https://www.patreon.com/mr4thdimention/) clone the repository into your 4coder directory and edit 4coder_default_bindings to the following:
+# Feaures
+## Major modes
+* Normal  mode: Home mode for all the editing commands, the "home" that starts with 4coder.
+* Insert  mode: Text insertation mode, remaps all the keys to writing their respective characters.
+* Replace mode: Text replacement mode, replaces the text under the cursor. Mostly buggy.
+
+# Insallaion
+## WARNING: This is my private prefered custom layer, it is not supported by Allen nor by me, and it's purpose is to and to share my customization code as an example.
+Support [Allen Webster on Patreon](https://www.patreon.com/mr4thdimention/) clone the repository into your 4coder directory and edit 4coder_default_bindings to the following:
 ```#if !defined(FCODER_DEFAULT_BINDINGS)
 #define FCODER_DEFAULT_BINDINGS
 
 #include "4coder_default_include.cpp"
 #include "4coder_modal/nj_modal.cpp"
 #include "4coder_modal/nj_hooks.cpp"
-
-// NOTE(allen|a4.0.22): This no longer serves as very good example code.
-// Good example code will be coming soon, but in the mean time you can go
-// to 4coder_remapping_commands.cpp for examples of what binding code looks like.
 
 #if !defined(NO_BINDING)
 extern "C" int32_t
