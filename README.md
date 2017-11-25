@@ -10,8 +10,8 @@ Major modes:
 * Replace mode: Text replacement mode, replaces the text under the cursor. Mostly buggy.
 
 # Installaion
-### WARNING: This is my private custom layer, it is not supported by Allen nor by me, and it's purpose is to and to share my customization code as an example.
-Support [Allen Webster on Patreon](https://www.patreon.com/mr4thdimention/) clone the repository into your 4coder directory and edit 4coder_default_bindings to the following:
+### WARNING: This is my private custom layer, it is not supported by Allen nor by me, and it's purpose is to and to share my customization code as an example. Also, it is not compatible with MAC.
+[Support Allen Webster on Patreon](https://www.patreon.com/mr4thdimention/), clone the repository into your 4coder directory and edit 4coder_default_bindings to the following:
 ```#if !defined(FCODER_DEFAULT_BINDINGS)
 #define FCODER_DEFAULT_BINDINGS
 
@@ -27,12 +27,7 @@ get_bindings(void *data, int32_t size){
     
     // set_all_default_hooks(context);
     nj_set_default_hooks(context);
-#if defined(__APPLE__) && defined(__MACH__)
-    mac_default_keys(context);
-#else
-    // default_keys(context);
     nj_keys(context);
-#endif
     
     int32_t result = end_bind_helper(context);
     return(result);
