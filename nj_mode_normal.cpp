@@ -25,88 +25,92 @@ CUSTOM_DOC("Activates 'normal' mode.")
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
     inherit_map(context, mapid_movements);
-    bind(context, 'e', MDFR_NONE, delete_char); 
-    bind(context, 'E', MDFR_NONE, nj_snipe_token_or_word); 
+    bind(context, 'e', MDFR_NONE, delete_char);
+    bind(context, 'E', MDFR_NONE, nj_snipe_token_or_word);
     
-    bind(context, 'i', MDFR_NONE, nj_mode_enter_insert); 
-    bind(context, 'I', MDFR_NONE, nj_mode_enter_chord_insert_single); 
-    bind(context, 'a', MDFR_NONE, nj_insert_after); 
-    bind(context, 'A', MDFR_NONE, nj_seek_eol_then_insert); 
-    bind(context, 'o', MDFR_NONE, nj_newline_then_insert_after); 
-    bind(context, 'O', MDFR_NONE, nj_newline_then_insert_before); 
+    bind(context, 'i', MDFR_NONE, nj_mode_enter_insert);
+    bind(context, 'I', MDFR_NONE, nj_mode_enter_chord_insert_single);
+    bind(context, 'a', MDFR_NONE, nj_insert_after);
+    bind(context, 'A', MDFR_NONE, nj_seek_eol_then_insert);
+    bind(context, 'o', MDFR_NONE, nj_newline_then_insert_after);
+    bind(context, 'O', MDFR_NONE, nj_newline_then_insert_before);
     
-    bind(context, 'd', MDFR_NONE, duplicate_line); 
-    bind(context, 'D', MDFR_NONE, delete_line); 
-    bind(context, 'x', MDFR_NONE, cut); 
-    bind(context, 'X', MDFR_NONE, nj_cut_line); 
-    bind(context, 'x', MDFR_ALT,  nj_cut_token_or_word); 
-    bind(context, 'c', MDFR_NONE, copy); 
-    bind(context, 'C', MDFR_NONE, nj_copy_line); 
-    bind(context, 'c', MDFR_ALT, nj_copy_token_or_word); 
-    bind(context, 'v', MDFR_NONE, paste); 
-    bind(context, 'V', MDFR_NONE, paste_next_and_indent); 
-    bind(context, 'p', MDFR_NONE, paste_and_indent); 
-    bind(context, 'P', MDFR_NONE, paste_next_and_indent); 
+    bind(context, 'd', MDFR_NONE, duplicate_line);
+    bind(context, 'D', MDFR_NONE, delete_line);
+    bind(context, 'x', MDFR_NONE, cut);
+    bind(context, 'X', MDFR_NONE, nj_cut_line);
+    bind(context, 'x', MDFR_ALT,  nj_cut_token_or_word);
+    bind(context, 'c', MDFR_NONE, copy);
+    bind(context, 'C', MDFR_NONE, nj_copy_line);
+    bind(context, 'c', MDFR_ALT, nj_copy_token_or_word);
+    bind(context, 'v', MDFR_NONE, paste);
+    bind(context, 'V', MDFR_NONE, paste_next_and_indent);
+    bind(context, 'p', MDFR_NONE, paste_and_indent);
+    bind(context, 'P', MDFR_NONE, paste_next_and_indent);
     
-    bind(context, 'g', MDFR_NONE, nj_mode_enter_chord_goto); 
-    bind(context, 'G', MDFR_NONE, nj_seek_end_of_file); 
+    bind(context, 'g', MDFR_NONE, nj_mode_enter_chord_goto);
+    bind(context, 'G', MDFR_NONE, nj_seek_end_of_file);
     
-    bind(context, 'z', MDFR_NONE, undo); 
-    bind(context, 'Z', MDFR_NONE, redo); 
-    bind(context, 'u', MDFR_NONE, undo); 
-    bind(context, 'U', MDFR_NONE, redo); 
+    bind(context, 'z', MDFR_NONE, undo);
+    bind(context, 'Z', MDFR_NONE, redo);
+    bind(context, 'u', MDFR_NONE, undo);
+    bind(context, 'U', MDFR_NONE, redo);
     
-    bind(context, 'f', MDFR_NONE, interactive_open_or_new); 
-    bind(context, 'F', MDFR_NONE, open_in_other); 
-    bind(context, 's', MDFR_NONE, save); 
+    bind(context, 'f', MDFR_NONE, interactive_open_or_new);
+    bind(context, 'F', MDFR_NONE, open_in_other);
+    bind(context, 's', MDFR_NONE, save);
     
-    bind(context, 'K', MDFR_NONE, kill_buffer); 
-    bind(context, 'u', MDFR_CTRL, interactive_kill_buffer); 
-    bind(context, 'b', MDFR_NONE, interactive_switch_buffer); 
+    bind(context, 'K', MDFR_NONE, kill_buffer);
+    bind(context, 'u', MDFR_CTRL, interactive_kill_buffer);
+    bind(context, 'b', MDFR_NONE, interactive_switch_buffer);
     
-    bind(context, ' ', MDFR_NONE, set_mark); 
-    bind(context, '_', MDFR_NONE, write_character); 
+    bind(context, ' ', MDFR_NONE, set_mark);
+    bind(context, '_', MDFR_NONE, write_character);
     
-    bind(context, 'L', MDFR_ALT, to_lowercase); 
-    bind(context, 'U', MDFR_ALT,  to_uppercase); 
+    bind(context, 'L', MDFR_ALT, to_lowercase);
+    bind(context, 'U', MDFR_ALT,  to_uppercase);
     
-    bind(context, '\n', MDFR_NONE,  newline_or_goto_position); 
-    bind(context, '\n', MDFR_SHIFT, newline_or_goto_position_same_panel); 
+    bind(context, 't', MDFR_NONE, list_all_substring_locations_case_insensitive);
+    bind(context, 'T', MDFR_NONE, list_all_locations_of_identifier);
     
-    bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single); 
-    bind(context, 'R', MDFR_NONE, nj_mode_enter_replace); 
+    bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single);
+    bind(context, 'R', MDFR_NONE, nj_mode_enter_replace);
     
-    bind(context, 'Q', MDFR_NONE, exit_4coder); 
+    bind(context, 'Q', MDFR_NONE, exit_4coder);
     
-    bind(context, key_back, MDFR_SHIFT, nj_backspace_line); 
+    bind(context, key_back, MDFR_SHIFT, nj_backspace_line);
     
-    bind(context, '\t', MDFR_NONE,  word_complete); 
-    bind(context, '\t', MDFR_CTRL,  auto_tab_range); 
-    bind(context, '\t', MDFR_SHIFT, auto_tab_line_at_cursor); 
+    bind(context, '\n', MDFR_NONE,  newline_or_goto_position);
+    bind(context, '\n', MDFR_SHIFT, newline_or_goto_position_same_panel);
     
-    bind(context, '!', MDFR_NONE, nj_execute_any_cli); 
-    bind(context, '!', MDFR_CTRL, execute_previous_cli); 
+    bind(context, '\t', MDFR_NONE,  word_complete);
+    bind(context, '\t', MDFR_CTRL,  auto_tab_range);
+    bind(context, '\t', MDFR_SHIFT, auto_tab_line_at_cursor);
     
-    bind(context, '~', MDFR_NONE, nj_execute_arbitrary_command); 
-    bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command); 
-    bind(context, '.', MDFR_NONE, nj_toggler); 
+    bind(context, '!', MDFR_NONE, nj_execute_any_cli);
+    bind(context, '!', MDFR_CTRL, execute_previous_cli);
     
-    bind(context, '[', MDFR_NONE, highlight_prev_scope_absolute); 
-    bind(context, ']', MDFR_NONE, highlight_next_scope_absolute); 
-    bind(context, '{', MDFR_NONE, place_in_scope); 
-    bind(context, '}', MDFR_NONE, scope_absorb_down); 
+    bind(context, '~', MDFR_NONE, nj_execute_arbitrary_command);
+    bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command);
+    bind(context, '.', MDFR_NONE, nj_toggler);
     
-    bind(context, 't', MDFR_NONE,  word_complete); 
+    bind(context, '[', MDFR_NONE, highlight_prev_scope_absolute);
+    bind(context, ']', MDFR_NONE, highlight_next_scope_absolute);
+    bind(context, '{', MDFR_NONE, place_in_scope);
+    bind(context, '}', MDFR_NONE, scope_absorb_down);
     
+    bind(context, '\t', MDFR_NONE,  word_complete);
+    
+    bind(context, '1', MDFR_NONE, open_file_in_quotes);
     bind(context, '2', MDFR_NONE, nj_open_matching_file_cpp_current_panel);
     bind(context, '@', MDFR_NONE, open_matching_file_cpp);
     bind(context, '3', MDFR_NONE, nj_mode_enter_chord_snippets);
     bind(context, '4', MDFR_NONE, nj_mode_enter_chord_case);
-    bind(context, '5', MDFR_NONE, nj_decrement_digit_decimal); 
-    bind(context, '%', MDFR_NONE, nj_decrement_digit_hexadecimal); 
-    bind(context, '6', MDFR_NONE, nj_increment_digit_decimal); 
-    bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal); 
-    bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings); 
+    bind(context, '5', MDFR_NONE, nj_decrement_digit_decimal);
+    bind(context, '%', MDFR_NONE, nj_decrement_digit_hexadecimal);
+    bind(context, '6', MDFR_NONE, nj_increment_digit_decimal);
+    bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal);
+    bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings);
     end_map(context);
 }
 
@@ -133,8 +137,17 @@ CUSTOM_DOC("Queries for a system command, runs the system command as a CLI and p
     char output_buffer_name_space[256] = {"*shell: "};
     String output_buffer_name = make_string_cap(output_buffer_name_space, str_size(output_buffer_name_space), 256);
     append_partial_ss(&output_buffer_name, bar_cmd.string);
-    replace_char(&output_buffer_name, '\\', '#');
-    replace_char(&output_buffer_name, '/',  '#');
+    
+    for(int i = 0; i < output_buffer_name.size; ++i) {
+        if(output_buffer_name.str[i] == '\\' ||
+           output_buffer_name.str[i] == '/') {
+            output_buffer_name.str[i] = '#';
+        }
+        else if(output_buffer_name.str[i] == '"') {
+            output_buffer_name.str[i] = '\'';
+        }
+    }
+    
     append_s_char(&output_buffer_name, '*');
     
     nj_execute_a_cli_command(app, bar_cmd.string, output_buffer_name);
@@ -288,7 +301,7 @@ void nj_ocd(Application_Links *app, char *seek, int32_t len){
             *(positions + line_index) = seek_line_char(abs_line_index, position);
             if(position > max_position){
                 max_position = position;
-            } 
+            }
             else if (position < min_position){
                 min_position = position;
             }
@@ -308,11 +321,11 @@ void nj_ocd(Application_Links *app, char *seek, int32_t len){
         {
             Buffer_Seek *position = positions + line_index;
             
-            // 
+            //
             // char msg_pos[256];
             // sprintf(msg_pos, "inserting space in position: L#%d C#%d T#%d\n", position->line, position->character, position->type);
             // print_message(app, msg_pos, str_size(msg_pos));
-            // 
+            //
             
             if(position->type != 0){
                 int32_t num_spaces = max_position - position->character;
@@ -368,10 +381,16 @@ void nj_replace_rectangle_function(Application_Links *app, char *str, int32_t le
         max_char_index = view.mark.character;
     }
     
-    int32_t line_count = max_line_index - min_line_index;
+    int32_t line_count = max_line_index - min_line_index + 1;
+    int32_t edit_count = 0;
+    
+    Partition *part = &global_part;
+    Temp_Memory temp = begin_temp_memory(part);
+    
+    Buffer_Edit *edits = push_array(part, Buffer_Edit, line_count);
     
     for(int32_t i = 0;
-        i <= line_count;
+        i < line_count;
         ++i)
     {
         Buffer_Seek min_seek = seek_line_char(min_line_index + i, min_char_index);
@@ -381,9 +400,19 @@ void nj_replace_rectangle_function(Application_Links *app, char *str, int32_t le
         if(buffer_compute_cursor(app, &buffer, min_seek, &min_cursor) &&
            buffer_compute_cursor(app, &buffer, max_seek, &max_cursor))
         {
-            buffer_replace_range(app, &buffer, min_cursor.pos, max_cursor.pos, str, len);
+            Buffer_Edit new_edit;
+            new_edit.str_start = 0;
+            new_edit.len = len;
+            new_edit.start = min_cursor.pos;
+            new_edit.end = max_cursor.pos;
+            edits[edit_count++] = new_edit;
+            
+            Assert(edit_count <= line_count);
         }
     }
+    
+    buffer_batch_edit(app, &buffer, str, len, edits, edit_count, BatchEdit_Normal);
+    end_temp_memory(temp);
 }
 
 CUSTOM_COMMAND_SIG(nj_delete_rectangle)

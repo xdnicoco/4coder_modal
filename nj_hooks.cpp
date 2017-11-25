@@ -11,8 +11,7 @@
 
 static void enter_mode_normal(struct Application_Links *app, int buffer_id);
 
-inline void nj_set_modal_color_scheme(Application_Links *app){
-    
+CUSTOM_COMMAND_SIG(nj_set_defult_modal_color_scheme){
     // NOTE(NJ): The following color scheme is tuned to work best with the mode color scheme
     // modifications when switching modes.
     int_color color_bg                = 0xFF1F1F1F;
@@ -41,7 +40,7 @@ inline void nj_set_modal_color_scheme(Application_Links *app){
     int_color color_pop1              = 0xFF03CF0C;
     int_color color_pop2              = 0xFFFF0000;
     
-    Theme_Color colors[] =  {                             
+    Theme_Color colors[] =  {
         { Stag_Back,              color_bg},
         { Stag_Margin,            color_margin},
         { Stag_Margin_Hover,      color_margin_hover},
@@ -80,7 +79,7 @@ inline void nj_set_modal_color_scheme(Application_Links *app){
         { Stag_Base,              color_base },
         { Stag_Pop1,              color_pop1 },
         { Stag_Pop2,              color_pop2 },
-    };                                                    
+    };
     set_theme_colors(app, colors, ArrayCount(colors));
 }
 
@@ -109,7 +108,7 @@ nj_4coder_initialized_by_space(Application_Links *app, Buffer_Identifier first_b
     // Restore Active to Left
     set_active_view(app, &view);
     
-    nj_set_modal_color_scheme(app);
+    nj_set_defult_modal_color_scheme(app);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(normal);
 }
 
@@ -168,7 +167,7 @@ OPEN_FILE_HOOK_SIG(nj_file_save){
     
 #if defined(FCODER_AUTO_INDENT_CPP)
     int32_t is_virtual = 0;
-    if (automatically_indent_text_on_save && buffer_get_setting(app, &buffer, BufferSetting_VirtualWhitespace, &is_virtual)){ 
+    if (automatically_indent_text_on_save && buffer_get_setting(app, &buffer, BufferSetting_VirtualWhitespace, &is_virtual)){
         if (is_virtual){
             auto_tab_whole_file_by_summary(app, &buffer);
         }

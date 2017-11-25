@@ -166,7 +166,6 @@ nj_keys(Bind_Helper *context){
     bind(context, ' ', MDFR_ALT, nj_toggler);
     
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
-    bind(context, key_f1, MDFR_CTRL, open_color_tweaker);
     
     bind(context, '=', MDFR_CTRL, open_panel_vsplit);
     bind(context, '-', MDFR_CTRL, open_panel_hsplit);
@@ -335,9 +334,6 @@ nj_keys(Bind_Helper *context){
     bind(context, 'k', MDFR_ALT,  move_up_10);
     bind(context, 'k', MDFR_CTRL, seek_whitespace_up_end_line);
     bind(context, 'k', MDFR_CTLT, move_line_up);
-    
-    bind(context, 't', MDFR_NONE, list_all_substring_locations_case_insensitive);
-    bind(context, 'T', MDFR_NONE, list_all_locations_of_identifier);
     
     bind(context, 'l', MDFR_NONE, move_right);
     bind(context, 'l', MDFR_CTRL, seek_alphanumeric_or_camel_right);

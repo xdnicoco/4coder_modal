@@ -118,6 +118,14 @@ CUSTOM_DOC("At the end of the line, insert a '// IMPORTANT' comment, includes us
 CUSTOM_COMMAND_SIG(nj_chord_snippet_zero_struct_then_prev)
 CUSTOM_DOC("At the end of the line, insert a ' = {0};', then return to the previous mode."){
     exec_command(app, seek_end_of_textual_line);
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t pos = view.cursor.pos;
+    char c = buffer_get_char(app, &buffer, pos);
+    if(c == ';'){
+        buffer_replace_range(app, &buffer, pos, pos+1, 0, 0);
+    }
     write_string(app, make_lit_string(" = {0};"));
     exec_command(app, move_down_textual);
     exec_command(app, nj_activate_previous_mode);
@@ -298,16 +306,7 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    char file_path_[256];
-    String file_path = make_fixed_width_string(file_path_);
-    
-    copy(&file_path, make_string(buffer.file_name, buffer.file_name_len));
-    String file_name = front_of_directory(file_path);
-    
-    String ext = file_extension(file_name);
-    print_message(app, ext.str, ext.size);
-    char gaurd_head[512];
-    char gaurd_tail[256];
+    String file_name = front_of_directory(make_string(buffer.file_name, buffer.file_name_len));
     
     char include_gaurd_[128];
     String include_gaurd = make_fixed_width_string(include_gaurd_);
@@ -322,12 +321,35 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     }
     include_gaurd.str[include_gaurd.size] = 0;
     
-    sprintf(gaurd_head, "#if !defined(%s)\n#define %s\n\n",
-            include_gaurd.str, include_gaurd.str);
+    char gaurd_head[file_name.size*2+32];
+    sprintf(gaurd_head, "#if !defined(%s)\n#define %s\n\n", include_gaurd.str, include_gaurd.str);
+    
+    char gaurd_tail[file_name.size+16];
     sprintf(gaurd_tail, "\n\n#endif // %s", include_gaurd.str);
     
-    buffer_replace_range(app, &buffer, 0, 0, gaurd_head, str_size(gaurd_head));
-    buffer_replace_range(app, &buffer, buffer.size, buffer.size, gaurd_tail, str_size(gaurd_tail));
+    Partition *part = &global_part;
+    Temp_Memory temp = begin_temp_memory(part);
+    Buffer_Edit edits[2];
+    
+    char *str = 0;
+    char *base = (char*)partition_current(part);
+    
+    str = push_array(part, char, str_size(gaurd_head));
+    memcpy(str, gaurd_head, sizeof(gaurd_head));
+    edits[0].str_start = (int32_t)(str - base);
+    edits[0].len = str_size(gaurd_head);
+    edits[0].start = 0;
+    edits[0].end = 0;
+    
+    str = push_array(part, char, str_size(gaurd_tail));
+    memcpy(str, gaurd_tail, str_size(gaurd_tail));
+    edits[1].str_start = (int32_t)(str - base);
+    edits[1].len = str_size(gaurd_tail);
+    edits[1].start = buffer.size;
+    edits[1].end = buffer.size;
+    
+    buffer_batch_edit(app, &buffer, base, part->pos, edits, ArrayCount(edits), BatchEdit_Normal);
+    end_temp_memory(temp);
     
     view_set_cursor(app, &view, seek_line_char(3, 0), 1);
 }
