@@ -308,7 +308,8 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     
     String file_name = front_of_directory(make_string(buffer.file_name, buffer.file_name_len));
     
-    char include_gaurd_[128];
+    const int32_t include_gaurd_size = 128;
+    char include_gaurd_[include_gaurd_size];
     String include_gaurd = make_fixed_width_string(include_gaurd_);
     copy_partial(&include_gaurd, file_name);
     for(int i = 0; i < include_gaurd.size; ++i){
@@ -321,10 +322,10 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     }
     include_gaurd.str[include_gaurd.size] = 0;
     
-    char gaurd_head[file_name.size*2+32];
+    char gaurd_head[include_gaurd_size*2+32];
     sprintf(gaurd_head, "#if !defined(%s)\n#define %s\n\n", include_gaurd.str, include_gaurd.str);
     
-    char gaurd_tail[file_name.size+16];
+    char gaurd_tail[include_gaurd_size+16];
     sprintf(gaurd_tail, "\n\n#endif // %s", include_gaurd.str);
     
     Partition *part = &global_part;
