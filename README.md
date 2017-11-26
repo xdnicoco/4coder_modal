@@ -25,7 +25,6 @@ get_bindings(void *data, int32_t size){
     Bind_Helper context_ = begin_bind_helper(data, size);
     Bind_Helper *context = &context_;
     
-    // set_all_default_hooks(context);
     nj_set_default_hooks(context);
     nj_keys(context);
     
