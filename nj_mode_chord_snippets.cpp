@@ -154,8 +154,7 @@ CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '}' separated by a blank line, then activate insert mode."){
     exec_command(app, seek_end_of_textual_line);
     char text[] = " {\n\n}";
-    int32_t size = sizeof(text) - 1;
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
@@ -163,8 +162,7 @@ CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_semicolon_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '};' separated by a blank line, then activate insert mode."){
     exec_command(app, seek_end_of_textual_line);
     char text[] = " {\n\n};";
-    int32_t size = sizeof(text) - 1;
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
@@ -172,8 +170,7 @@ CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_break_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '} break;' separated by a blank line, then activate insert mode."){
     exec_command(app, seek_end_of_textual_line);
     char text[] = " {\n\n} break;";
-    int32_t size = sizeof(text) - 1;
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
@@ -192,8 +189,7 @@ CUSTOM_DOC("At the cursor, insert a 'case :{' and '} break;' separated by a blan
     else {
         text = "\ncase : {\n\n} break;";
     }
-    int32_t size = str_size(text);
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 5);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
@@ -213,8 +209,7 @@ CUSTOM_DOC("At the cursor, insert a 'if(){' and '}' separated by a blank line, t
     else {
         text = "\nif() {\n\n}";
     }
-    int32_t size = str_size(text);
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 3);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
@@ -234,8 +229,7 @@ CUSTOM_DOC("At the cursor, insert a 'else if(){' and '}' separated by a blank li
     else {
         text = "\nelse if() {\n\n}";
     }
-    int32_t size = str_size(text);
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 8);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
@@ -255,7 +249,6 @@ CUSTOM_DOC("At the cursor, insert a 'else {' and '}' separated by a blank line, 
     else {
         text = "\nelse {\n\n}";
     }
-    int32_t size = str_size(text);
     long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
@@ -276,8 +269,7 @@ CUSTOM_DOC("At the cursor, insert a 'for(;;){' and '} ' separated by a blank lin
     else {
         text = "\nfor(;;) {\n\n}";
     }
-    int32_t size = str_size(text);
-    long_braces(app, text, size);
+    long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 4);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
