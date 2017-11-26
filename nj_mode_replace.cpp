@@ -26,26 +26,26 @@ CUSTOM_DOC("Activates 'replace' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    bind_vanilla_keys(context, nj_replace_character); 
-    bind(context, ' ', MDFR_SHIFT, write_character); 
-    bind(context, 't', MDFR_NONE, word_complete); 
+    bind_vanilla_keys(context, nj_replace_character);
+    bind(context, ' ', MDFR_SHIFT, write_character);
+    bind(context, 't', MDFR_NONE, word_complete);
     
-    bind(context, key_insert, MDFR_NONE, nj_activate_previous_mode); 
-    bind(context, key_back,   MDFR_NONE, nj_replace_mode_backspace); 
+    bind(context, key_insert, MDFR_NONE, nj_activate_previous_mode);
+    bind(context, key_back,   MDFR_NONE, nj_replace_mode_backspace);
     
-    bind(context, 'x', MDFR_CTRL, nj_replace_mode_cut); 
-    bind(context, 'X', MDFR_CTRL, nj_replace_mode_cut_line); 
-    bind(context, 'x', MDFR_ALT,  nj_replace_mode_cut_token_or_word); 
+    bind(context, 'x', MDFR_CTRL, nj_replace_mode_cut);
+    bind(context, 'X', MDFR_CTRL, nj_replace_mode_cut_line);
+    bind(context, 'x', MDFR_ALT,  nj_replace_mode_cut_token_or_word);
     
-    bind(context, 'e', MDFR_ALT,  nj_replace_mode_snipe_token_or_word); 
+    bind(context, 'e', MDFR_ALT,  nj_replace_mode_snipe_token_or_word);
     
-    bind(context, 'v', MDFR_CTRL, nj_replace_mode_paste); 
-    bind(context, 'V', MDFR_CTRL, nj_replace_mode_paste_next); 
-    bind(context, 'p', MDFR_CTRL, nj_replace_mode_paste); 
-    bind(context, 'P', MDFR_CTRL, nj_replace_mode_paste_next); 
+    bind(context, 'v', MDFR_CTRL, nj_replace_mode_paste);
+    bind(context, 'V', MDFR_CTRL, nj_replace_mode_paste_next);
+    bind(context, 'p', MDFR_CTRL, nj_replace_mode_paste);
+    bind(context, 'P', MDFR_CTRL, nj_replace_mode_paste_next);
     
-    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
-    inherit_map(context, mapid_movements); 
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
+    inherit_map(context, mapid_movements);
     end_map(context); //mapid_replace
 }
 
@@ -63,7 +63,7 @@ CUSTOM_DOC("Replaces the character under the cursor with whatever character was 
 }
 
 // HACK(NJ): You should be more smart than just undoing twice
-CUSTOM_COMMAND_SIG(nj_replace_mode_backspace) 
+CUSTOM_COMMAND_SIG(nj_replace_mode_backspace)
 CUSTOM_DOC("Undoes the last two operation, then moves to the left. HACKIE AS HELL."){
     exec_command(app, undo);
     exec_command(app, undo);

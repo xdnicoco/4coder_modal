@@ -34,35 +34,35 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
 
 CUSTOM_COMMAND_SIG(nj_mode_enter_chord_goto)
 CUSTOM_DOC("Activates 'chord goto' mode.")
-{                                                                                                                                                       
+{
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
 }
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap); 
-    bind(context,'0', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'1', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'2', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'3', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'4', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'5', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'6', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'7', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'8', MDFR_NONE, nj_chord_goto_seek_line); 
-    bind(context,'9', MDFR_NONE, nj_chord_goto_seek_line); 
+    inherit_map(context, mapid_nomap);
+    bind(context,'0', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'1', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'2', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'3', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'4', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'5', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'6', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'7', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'8', MDFR_NONE, nj_chord_goto_seek_line);
+    bind(context,'9', MDFR_NONE, nj_chord_goto_seek_line);
     
-    bind(context,'+', MDFR_NONE, nj_chord_goto_set_mode_add); 
-    bind(context,'-', MDFR_NONE, nj_chord_goto_set_mode_sub); 
-    bind(context,'=', MDFR_NONE, nj_chord_goto_set_mode_absolute); 
+    bind(context,'+', MDFR_NONE, nj_chord_goto_set_mode_add);
+    bind(context,'-', MDFR_NONE, nj_chord_goto_set_mode_sub);
+    bind(context,'=', MDFR_NONE, nj_chord_goto_set_mode_absolute);
     
-    bind(context,'g', MDFR_NONE, nj_chord_goto_seek_beginning_of_file_then_prev); 
-    bind(context,'G', MDFR_NONE, nj_chord_goto_seek_end_of_file_then_prev); 
-    bind(context, key_back, MDFR_NONE, nj_chord_goto_backspace); 
+    bind(context,'g', MDFR_NONE, nj_chord_goto_seek_beginning_of_file_then_prev);
+    bind(context,'G', MDFR_NONE, nj_chord_goto_seek_end_of_file_then_prev);
+    bind(context, key_back, MDFR_NONE, nj_chord_goto_backspace);
     
-    bind(context, key_esc, MDFR_NONE, nj_chord_goto_cancel); 
+    bind(context, key_esc, MDFR_NONE, nj_chord_goto_cancel);
     
-    bind(context, 'n', MDFR_NONE, nj_activate_previous_mode); 
+    bind(context, '\n', MDFR_NONE, nj_activate_previous_mode);
     end_map(context);
 }
 

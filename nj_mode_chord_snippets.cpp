@@ -49,7 +49,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, '*',  MDFR_NONE, nj_chord_snippet_eol_block_then_insert);
     bind(context, ';',  MDFR_NONE, nj_chord_snippet_eol_semicolon_then_prev);
     bind(context, '\\', MDFR_NONE, nj_chord_snippet_eol_backslash_then_prev);
-    bind(context, '/',  MDFR_NONE, nj_comment_line_then_prev);
+    bind(context, '/',  MDFR_NONE, nj_toggle_comment_line_then_prev);
     bind(context, '#',  MDFR_NONE, nj_include_gaurd_file_then_prev);
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
     end_map(context);
@@ -180,9 +180,19 @@ CUSTOM_DOC("At the cursor, insert a '{' and '} break;' separated by a blank line
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_case_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'case :{' and '} break;' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\ncase : {\n\n} break;";
-    int32_t size = sizeof(text) - 1;
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "case : {\n\n} break;";
+    }
+    else {
+        text = "\ncase : {\n\n} break;";
+    }
+    int32_t size = str_size(text);
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 5);
@@ -191,9 +201,19 @@ CUSTOM_DOC("At the cursor, insert a 'case :{' and '} break;' separated by a blan
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_if_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'if(){' and '}' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\nif() {\n\n}";
-    int32_t size = sizeof(text) - 1;
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "if() {\n\n}";
+    }
+    else {
+        text = "\nif() {\n\n}";
+    }
+    int32_t size = str_size(text);
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 3);
@@ -202,9 +222,19 @@ CUSTOM_DOC("At the cursor, insert a 'if(){' and '}' separated by a blank line, t
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_else_if_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'else if(){' and '}' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\nelse if() {\n\n}";
-    int32_t size = sizeof(text) - 1;
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "else if() {\n\n}";
+    }
+    else {
+        text = "\nelse if() {\n\n}";
+    }
+    int32_t size = str_size(text);
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 8);
@@ -213,10 +243,20 @@ CUSTOM_DOC("At the cursor, insert a 'else if(){' and '}' separated by a blank li
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_else_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'else {' and '}' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\nelse {\n\n}";
-    int32_t size = sizeof(text) - 1;
-    long_braces(app, text, size);
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "else {\n\n}";
+    }
+    else {
+        text = "\nelse {\n\n}";
+    }
+    int32_t size = str_size(text);
+    long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
@@ -224,9 +264,19 @@ CUSTOM_DOC("At the cursor, insert a 'else {' and '}' separated by a blank line, 
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_for_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'for(;;){' and '} ' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\nfor(;;) {\n\n}";
-    int32_t size = sizeof(text) - 1;
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "for(;;) {\n\n}";
+    }
+    else {
+        text = "\nfor(;;) {\n\n}";
+    }
+    int32_t size = str_size(text);
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 4);
@@ -235,9 +285,19 @@ CUSTOM_DOC("At the cursor, insert a 'for(;;){' and '} ' separated by a blank lin
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_while_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'while(){' and '} ' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\nwhile() {\n\n}";
-    int32_t size = sizeof(text) - 1;
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "while() {\n\n}";
+    }
+    else {
+        text = "\nwhile() {\n\n}";
+    }
+    int32_t size = str_size(text);
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 6);
@@ -246,9 +306,19 @@ CUSTOM_DOC("At the cursor, insert a 'while(){' and '} ' separated by a blank lin
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_switch_then_insert)
 CUSTOM_DOC("At the cursor, insert a 'switch(){' and '} ' separated by a blank line, then activate insert mode."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     exec_command(app, seek_end_of_textual_line);
-    char text[] = "\nswitch() {\ncase : {\n\n} break;\n}";
-    int32_t size = sizeof(text) - 1;
+    
+    char *text;
+    if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
+        text = "switch() {\ncase : {\n\n} break;\n}";
+    }
+    else {
+        text = "\nswitch() {\ncase : {\n\n} break;\n}";
+    }
+    int32_t size = str_size(text);
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 7);
@@ -286,17 +356,27 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a '\\', then return 
     exec_command(app, nj_activate_previous_mode);
 }
 
-CUSTOM_COMMAND_SIG(nj_comment_line)
-CUSTOM_DOC("At the beggining of the line under the cursor, insert a '// ', then move the cursor to the next line."){
+CUSTOM_COMMAND_SIG(nj_toggle_comment_line)
+CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then move the cursor to the next line."){
     exec_command(app, seek_beginning_of_textual_line);
-    write_string(app, make_lit_string("// "));
+    View_Summary view = get_active_view(app, AccessOpen);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    
+    int32_t pos = view.cursor.pos;
+    if(buffer_get_char(app, &buffer, pos) == '/' &&
+       buffer_get_char(app, &buffer, pos + 1) == '/') {
+        buffer_replace_range(app, &buffer, pos, pos + 2, 0, 0);
+    }
+    else {
+        write_string(app, make_lit_string("// "));
+    }
     exec_command(app, seek_end_of_textual_line);
     exec_command(app, move_right);
 }
 
-CUSTOM_COMMAND_SIG(nj_comment_line_then_prev)
-CUSTOM_DOC("At the beggining of the line under the cursor, insert a '// ', then move the cursor to the next line and return to the previous mode."){
-    exec_command(app, nj_comment_line);
+CUSTOM_COMMAND_SIG(nj_toggle_comment_line_then_prev)
+CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then move the cursor to the next line and return to the previous mode."){
+    exec_command(app, nj_toggle_comment_line);
     exec_command(app, nj_activate_previous_mode);
 }
 
@@ -358,6 +438,72 @@ CUSTOM_COMMAND_SIG(nj_include_gaurd_file_then_prev)
 CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the current buffer file name, then return to the previous mode."){
     exec_command(app, nj_include_gaurd_file);
     exec_command(app, nj_activate_previous_mode);
+}
+CUSTOM_COMMAND_SIG(nj_if0_off)
+CUSTOM_DOC("Surround the range between the cursor and mark with an '#if 0' and an '#endif', but with smarter whitespace considiration.")
+{
+    View_Summary view = get_active_view(app, AccessOpen);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    
+    Range range = get_range(&view);
+    char *text1, *text2;
+    int32_t min_pos, max_pos;
+    if(range.min == seek_line_end(app, &buffer, range.min) &&
+       range.min+1 == seek_line_end(app, &buffer, range.min)) {
+        min_pos = range.min+1;
+        text1 = "#if 0";
+    }
+    else {
+        min_pos = seek_line_beginning(app, &buffer, range.min);
+        text1 = "#if 0\n";
+    }
+    int32_t size1 = str_size(text1);
+    
+    if(range.max == seek_line_end(app, &buffer, range.max) &&
+       range.max+1 == seek_line_end(app, &buffer, range.max)) {
+        max_pos = range.max+1;
+        text2 = "#endif";
+    }
+    else {
+        max_pos = seek_line_beginning(app, &buffer, range.max);
+        text2 = "#endif\n";
+    }
+    int32_t size2 = str_size(text2);
+    
+    if (min_pos < max_pos){
+        
+        Buffer_Edit edits[2];
+        char *str = 0;
+        char *base = (char*)partition_current(&global_part);
+        
+        str = push_array(&global_part, char, size1);
+        memcpy(str, text1, size1);
+        edits[0].str_start = (int32_t)(str - base);
+        edits[0].len = size1;
+        edits[0].start = min_pos;
+        edits[0].end = min_pos;
+        
+        str = push_array(&global_part, char, size2);
+        memcpy(str, text2, size2);
+        edits[1].str_start = (int32_t)(str - base);
+        edits[1].len = size2;
+        edits[1].start = max_pos;
+        edits[1].end = max_pos;
+        
+        buffer_batch_edit(app, &buffer, base, global_part.pos, edits, ArrayCount(edits), BatchEdit_Normal);
+        
+        view = get_view(app, view.view_id, AccessAll);
+        if (view.cursor.pos > view.mark.pos){
+            view_set_cursor(app, &view, seek_line_char(view.cursor.line+1, view.cursor.character), 1);
+        }
+        else{
+            view_set_mark(app, &view, seek_line_char(view.mark.line+1, view.mark.character));
+        }
+        
+        range = get_range(&view);
+        buffer_auto_indent(app, &buffer, range.min, range.max, DEF_TAB_WIDTH, DEFAULT_INDENT_FLAGS | AutoIndent_FullTokens);
+        move_past_lead_whitespace(app, &view, &buffer);
+    }
 }
 
 #endif // NJ_MODE_CHORD_SNIPPETS_CPP

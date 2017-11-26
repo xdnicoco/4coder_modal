@@ -9,6 +9,14 @@
 // Key Bindings
 //
 
+static bool32 nj_theme_colors_inverted = false;
+
+static void nj_invert_colors(Theme_Color *colors, int32_t len){
+    for(int i = 0; i < len; ++i) {
+        colors[i].color = (0xFFFFFFFF - colors[i].color) | 0xFF000000;
+    }
+}
+
 #define MDFR_CTLT MDFR_CTRL | MDFR_ALT
 #include "4coder_generated/command_metadata.h"
 #define NJ_MODES(modifier) \
@@ -30,6 +38,7 @@ enum NJ_Mapid {
     NJ_MODES(NJ_MODE_MAPID)
 #undef NJ_MODE_MAPID
 };
+
 
 #define NJ_MODE_MAPID_(mode) mapid_##mode
 #define NJ_MODE_MAPID(mode) NJ_MODE_MAPID_(mode)
@@ -67,6 +76,7 @@ static void mode_enter_##mode(struct Application_Links *app, int buffer_id){    
         { Stag_Pop1,          color_pop1       },                                                                                                       \
         { Stag_Pop2,          color_pop2       },                                                                                                       \
     };                                                                                                                                                  \
+    if(nj_theme_colors_inverted) nj_invert_colors(colors, ArrayCount(colors));                                                                          \
     set_theme_colors(app, colors, ArrayCount(colors));                                                                                                  \
     NJ_MODE_PRINT_ENTER_HOOK;                                                                                                                           \
 }
@@ -249,6 +259,11 @@ nj_keys(Bind_Helper *context){
     bind(context, 'R', MDFR_ALT,  reopen);
     bind(context, 'r', MDFR_ALT,  replace_in_range);
     bind(context, 'r', MDFR_CTLT, nj_replace_rectangle);
+    
+    // bind(context, 'c', MDFR_CTLT, nj_copy_rectangle);
+    // bind(context, 'x', MDFR_CTLT, nj_cut_rectangle);
+    // bind(context, 'v', MDFR_CTLT, nj_paste_rectangle);
+    
     bind(context, 'R', MDFR_CTRL, query_replace_identifier);
     bind(context, 'r', MDFR_CTRL, query_replace);
     bind(context, 's', MDFR_ALT,  save);
@@ -292,8 +307,8 @@ nj_keys(Bind_Helper *context){
     bind(context, '{', MDFR_CTRL, open_long_braces_semicolon);
     bind(context, '}', MDFR_CTRL, open_long_braces_break);
     
-    bind(context, '/', MDFR_CTRL, nj_comment_line);
-    bind(context, '/', MDFR_ALT,  if0_off);
+    bind(context, '/', MDFR_CTRL, nj_toggle_comment_line);
+    bind(context, '/', MDFR_ALT,  nj_if0_off);
     
     bind(context, key_f1,  MDFR_NONE, project_fkey_command);
     bind(context, key_f2,  MDFR_NONE, project_fkey_command);
