@@ -37,3 +37,7 @@ get_bindings(void *data, int32_t size){
 ```
 
 For further information and documentaion check the [4coder documentaion page](http://4coder.net/custom_docs.html).
+
+#### Screenshots
+![Screenshot of the color scheme, normal colors](https://i.imgur.com/kMg5FMD.png)
+![Screenshot of the color scheme, inverted colors](https://i.imgur.com/TGFR6Ax.png)
