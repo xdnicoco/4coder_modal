@@ -10,14 +10,15 @@ enum NJ_Chord_Goto_State_Mode {
 };
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE){
-    uint32_t line_input;
-    uint32_t line_prev;
+    int32_t line_input;
+    Full_Cursor last_position;
     NJ_Chord_Goto_State_Mode goto_mode;
 };
 
 #define NJ_MODE_PRINT_ENTER_HOOK \
-NJ_MODE_STATE(NJ_CURRENT_MODE).line_prev = get_active_view(app, AccessAll).cursor.line;\
+View_Summary view = get_active_view(app, AccessProtected);\
 NJ_MODE_STATE(NJ_CURRENT_MODE).line_input = 0;\
+NJ_MODE_STATE(NJ_CURRENT_MODE).last_position = view.cursor;\
 NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_absolute;
 
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
@@ -68,22 +69,24 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
 
 inline void nj_chord_goto_apply_seek(Application_Links *app){
     uint32_t line_number;
+    View_Summary view = get_active_view(app, AccessProtected);
+    
     switch(NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode){
         case nj_chord_goto_mode_absolute:{
             line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
         } break;
         case nj_chord_goto_mode_add:{
-            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).line_prev + NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
+            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.line + NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
         } break;
         case nj_chord_goto_mode_sub:{
-            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).line_prev - NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
+            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.line - NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
         } break;
         default:
         case nj_chord_goto_mode_cancel:{
-            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).line_prev;
+            view_set_cursor(app, &view, seek_pos(NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.pos), true);
+            return;
         } break;
     }
-    
     
 #if 0
     char msg[1024];
@@ -91,8 +94,7 @@ inline void nj_chord_goto_apply_seek(Application_Links *app){
     print_message(app, msg, str_size(msg));
 #endif
     
-    View_Summary view = get_active_view(app, AccessProtected);
-    view_set_cursor(app, &view, seek_line_char(line_number, 0), true);
+    view_set_cursor(app, &view, seek_line_char(line_number, NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.character), true);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_seek_end_of_file_then_prev)
