@@ -1,5 +1,5 @@
 # 4coder Modal Customization Layer
-This is my customization layer of 4coder super in the journey to a modal future.
+This is my EXPEREMENTAL(!!) customization layer of 4coder super in the journey to a modal future.
 I took some elements from emacs, and some elements from vim, and added my own functions and functionality to create a highly customized modal system.
 
 Tested only on 4coder 2.24.
