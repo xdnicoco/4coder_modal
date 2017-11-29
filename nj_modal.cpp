@@ -17,7 +17,6 @@ static void nj_invert_colors(Theme_Color *colors, int32_t len){
     }
 }
 
-#define MDFR_CTLT MDFR_CTRL | MDFR_ALT
 #include "4coder_generated/command_metadata.h"
 #define NJ_MODES(modifier) \
 modifier(insert)\
@@ -167,6 +166,11 @@ inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
     }
 }
 
+
+#define MDFR_CTLT MDFR_CTRL  | MDFR_ALT
+#define MDFR_SHRL MDFR_SHIFT | MDFR_CTRL
+#define MDFR_SHLT MDFR_SHIFT | MDFR_ALT
+
 void
 nj_keys(Bind_Helper *context){
     begin_map(context, mapid_common);
@@ -201,7 +205,7 @@ nj_keys(Bind_Helper *context){
     bind(context, key_del,       MDFR_NONE,  delete_char);
     bind(context, key_del,       MDFR_SHIFT, delete_char);
     bind(context, key_back,      MDFR_NONE,  backspace_char);
-    bind(context, key_back,      MDFR_CTRL|MDFR_SHIFT, nj_backspace_line);
+    bind(context, key_back,      MDFR_SHRL,  nj_backspace_line);
     bind(context, key_up,        MDFR_NONE,  move_up);
     bind(context, key_down,      MDFR_NONE,  move_down);
     bind(context, key_end,       MDFR_NONE,  seek_end_of_textual_line);
@@ -218,11 +222,11 @@ nj_keys(Bind_Helper *context){
     
     bind(context, key_up,   MDFR_CTRL, seek_whitespace_up_end_line);
     bind(context, key_up,   MDFR_ALT,  move_up_10);
-    bind(context, key_up,   MDFR_CTLT, move_line_up);
+    bind(context, key_up,   MDFR_SHRL, move_line_up);
     
     bind(context, key_down, MDFR_CTRL, seek_whitespace_down_end_line);
     bind(context, key_down, MDFR_ALT,  move_down_10);
-    bind(context, key_down, MDFR_CTLT, move_line_down);
+    bind(context, key_down, MDFR_SHRL, move_line_down);
     
     bind(context, key_right, MDFR_CTRL, seek_alphanumeric_or_camel_right);
     bind(context, key_right, MDFR_ALT,  seek_whitespace_right);
