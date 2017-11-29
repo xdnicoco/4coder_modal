@@ -388,17 +388,17 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
         if(char_is_lower(include_gaurd.str[i])){
             include_gaurd.str[i] = char_to_upper(include_gaurd.str[i]);
         }
-        else if(!char_is_upper(include_gaurd.str[i])){
+        else if(!char_is_alpha_numeric(include_gaurd.str[i])){
             include_gaurd.str[i] = '_';
         }
     }
     include_gaurd.str[include_gaurd.size] = 0;
     
-    char gaurd_head[include_gaurd_size*2+32];
-    sprintf(gaurd_head, "#if !defined(%s)\n#define %s\n\n", include_gaurd.str, include_gaurd.str);
+    char gaurd_head[include_gaurd_size*2+64];
+    sprintf(gaurd_head, "#if !defined(GAURD_%s)\n#define GAURD_%s\n\n", include_gaurd.str, include_gaurd.str);
     
-    char gaurd_tail[include_gaurd_size+16];
-    sprintf(gaurd_tail, "\n\n#endif // %s", include_gaurd.str);
+    char gaurd_tail[include_gaurd_size+32];
+    sprintf(gaurd_tail, "\n\n#endif // GAURD_%s", include_gaurd.str);
     
     Partition *part = &global_part;
     Temp_Memory temp = begin_temp_memory(part);
