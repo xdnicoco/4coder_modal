@@ -42,7 +42,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'x', MDFR_ALT,  nj_cut_token_or_word);
     bind(context, 'c', MDFR_NONE, copy);
     bind(context, 'C', MDFR_NONE, nj_copy_line);
-    bind(context, 'c', MDFR_ALT, nj_copy_token_or_word);
+    bind(context, 'c', MDFR_ALT,  nj_copy_token_or_word);
     bind(context, 'v', MDFR_NONE, paste);
     bind(context, 'V', MDFR_NONE, paste_next_and_indent);
     bind(context, 'p', MDFR_NONE, paste_and_indent);
@@ -94,10 +94,11 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command);
     bind(context, '.', MDFR_NONE, nj_toggler);
     
-    bind(context, '[', MDFR_NONE, highlight_prev_scope_absolute);
-    bind(context, ']', MDFR_NONE, highlight_next_scope_absolute);
-    bind(context, '{', MDFR_NONE, place_in_scope);
-    bind(context, '}', MDFR_NONE, scope_absorb_down);
+    bind(context, '[',  MDFR_NONE, highlight_surrounding_scope);
+    bind(context, ']',  MDFR_NONE, highlight_prev_scope_absolute);
+    bind(context, '\'', MDFR_NONE, highlight_next_scope_absolute);
+    bind(context, '{',  MDFR_NONE, place_in_scope);
+    bind(context, '}',  MDFR_NONE, scope_absorb_down);
     
     bind(context, '\t', MDFR_NONE,  word_complete);
     
