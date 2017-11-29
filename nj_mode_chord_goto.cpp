@@ -1,3 +1,12 @@
+/*
+This mode set the curser to a specific line number (absolute or relative to the current cursor's line).
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
+
 #if !defined(NJ_MODE_CHORD_GOTO_CPP)
 #define NJ_MODE_CHORD_GOTO_CPP
 

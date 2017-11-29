@@ -1,3 +1,13 @@
+/*
+This mode is used to navigate, make changes to the text, delete and edit whitespace, call buffer commands etc.
+This is the default mode the editor starts in, and it is essential to the modal system to have it.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
+
 #if !defined(NJ_MODE_NORMAL_CPP)
 #define NJ_MODE_NORMAL_CPP
 

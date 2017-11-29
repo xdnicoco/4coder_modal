@@ -1,3 +1,12 @@
+/*
+This mode sets some of the editor, view, buffer or mode settings, then activates the previous mode.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
+
 #if !defined(NJ_MODE_CHORD_SETTINGS)
 #define NJ_MODE_CHORD_SETTINGS
 

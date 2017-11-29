@@ -1,3 +1,12 @@
+/*
+This mode binds the functions to set up the case of the token or the selected range.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
+
 #if !defined(NJ_MODE_CHORD_CASE_CPP)
 #define NJ_MODE_CHORD_CASE_CPP
 
@@ -24,14 +33,14 @@ CUSTOM_DOC("Activates 'chord case' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap); 
-    bind(context, 'l', MDFR_NONE, nj_chord_case_lower_token_or_word); 
-    bind(context, 'L', MDFR_NONE, nj_chord_case_lower); 
-    bind(context, 'u', MDFR_NONE, nj_chord_case_upper_token_or_word); 
-    bind(context, 'U', MDFR_NONE, nj_chord_case_upper); 
-    bind(context, 'c', MDFR_NONE, nj_chord_case_camel_token_or_word); 
-    bind(context, 'C', MDFR_NONE, nj_chord_case_camel); 
-    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
+    inherit_map(context, mapid_nomap);
+    bind(context, 'l', MDFR_NONE, nj_chord_case_lower_token_or_word);
+    bind(context, 'L', MDFR_NONE, nj_chord_case_lower);
+    bind(context, 'u', MDFR_NONE, nj_chord_case_upper_token_or_word);
+    bind(context, 'U', MDFR_NONE, nj_chord_case_upper);
+    bind(context, 'c', MDFR_NONE, nj_chord_case_camel_token_or_word);
+    bind(context, 'C', MDFR_NONE, nj_chord_case_camel);
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
     end_map(context); // mapid_insert
 }
 

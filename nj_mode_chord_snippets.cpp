@@ -1,3 +1,11 @@
+/*
+This mode inserts a snippet.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
 #if !defined(NJ_MODE_CHORD_SNIPPETS_CPP)
 #define NJ_MODE_CHORD_SNIPPETS_CPP
 

@@ -1,5 +1,11 @@
 /*
  nj 4coder custom hooks
+Here I setup 4coder so it will support the modes.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
 #if !defined(FCODER_NJ_HOOKS_CPP)

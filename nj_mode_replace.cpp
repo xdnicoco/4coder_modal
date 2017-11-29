@@ -1,3 +1,12 @@
+/*
+This mode replaces the character under the curser with the characters pressed.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
+
 #if !defined(NJ_MODE_REPLACE_CPP)
 #define NJ_MODE_REPLACE_CPP
 

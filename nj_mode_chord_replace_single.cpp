@@ -1,3 +1,13 @@
+/*
+This mode replaces the character under the curser with
+the next character pressed after activating it, then returns to the previous mode.
+
+WARNING:
+This custom extension provided "as is" without warranty of any kind,
+ either express or implied, including without limitation any implied warranties of condition,
+ uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+*/
+
 #if !defined(NJ_MODE_CHORD_REPLACE_SINGLE_CPP)
 #define NJ_MODE_CHORD_REPLACE_SINGLE_CPP
 
@@ -24,10 +34,10 @@ CUSTOM_DOC("Activates 'chord replace single' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap); 
-    bind_vanilla_keys(context, nj_replace_character_then_prev); 
-    bind(context, 'v', MDFR_CTRL, nj_mode_chord_replace_single_paste_then_prev); 
-    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal); 
+    inherit_map(context, mapid_nomap);
+    bind_vanilla_keys(context, nj_replace_character_then_prev);
+    bind(context, 'v', MDFR_CTRL, nj_mode_chord_replace_single_paste_then_prev);
+    bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
     end_map(context);
 }
 
