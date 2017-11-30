@@ -176,7 +176,7 @@ CUSTOM_DOC("Starts to record a keyboard macro mode.") {
             while(nj_recording_macro){
                 User_Input in = get_user_input(app, EventOnAnyKey, 0);
                 
-#if 1
+#if 0
                 { // NOTE(NJ): debugging data
                     char msg[256];
                     sprintf(msg, "Input: key = %c, command = %p\n", in.key.character, in.command.command);
@@ -217,40 +217,65 @@ CUSTOM_DOC("Finishes to record a keyboard macro mode."){
     }
 }
 
+static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t current_register){
+    if(nj_macro_registers[current_register].initialized){
+        NJ_Input_Node *current_node = &nj_macro_registers[current_register].root;
+        while(current_node){
+            // HACK(NJ): Currently emulating write_character and nj_chord_goto_seek_line
+            // TODO(NJ): Find a way to change the user input returned from get_command_input;
+            if(current_node->input.command.command == write_character){
+                uint8_t character[4];
+                uint32_t length = to_writable_character(current_node->input, character);
+                write_character_parameter(app, character, length);
+            }
+#if 0
+            else if(current_node->input.command.command == nj_chord_goto_seek_line) {
+                if(char_is_numeric((char)current_node->input.key.character))
+                {
+                    char input_character[] = {(char)current_node->input.key.character, 0};
+                    i32_4tech input_digit = str_to_int_c(input_character);
+                    
+                    NJ_MODE_STATE(chord_goto).line_input = NJ_MODE_STATE(chord_goto).line_input*10 + input_digit;
+                    nj_chord_goto_apply_seek(app);
+                }
+            }
+#endif
+            else {
+                current_node->input.command.command(app);
+            }
+            current_node = current_node->n;
+        }
+    }
+}
+
 CUSTOM_COMMAND_SIG(nj_play_keyboard_macro)
 CUSTOM_DOC("Plays a keyboard macro mode from a given register.")
 {
     if(!nj_recording_macro)
     {
-        Query_Bar bar;
-        char bar_space[1024];
-        bar.prompt = make_lit_string("Play macro from register: ");
-        bar.string = make_fixed_width_string(bar_space);
+        Query_Bar register_bar;
+        char register_bar_space[256];
+        register_bar.prompt = make_lit_string("Play macro from register: ");
+        register_bar.string = make_fixed_width_string(register_bar_space);
         
-        if(query_user_number(app, &bar)) {
-            int32_t current_register = str_to_int_s(bar.string);
+        if(query_user_number(app, &register_bar)) {
+            int32_t current_register = str_to_int_s(register_bar.string);
             
             if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
-                if(nj_macro_registers[current_register].initialized){
-                    NJ_Input_Node *current_node = &nj_macro_registers[current_register].root;
-                    while(current_node){
-                        // HACK(NJ): Currently emulating write_character
-                        // TODO(NJ): Find a way to change the user input returned from get_command_input;
-                        if(current_node->input.command.command == write_character){
-                            uint8_t character[4];
-                            uint32_t length = to_writable_character(current_node->input, character);
-                            write_character_parameter(app, character, length);
-                        }
-                        else {
-                            current_node->input.command.command(app);
-                        }
-                        current_node = current_node->n;
+                Query_Bar times_bar;
+                char times_bar_space[256];
+                times_bar.prompt = make_lit_string("How many times do you want to play the macro? ");
+                times_bar.string = make_fixed_width_string(times_bar_space);
+                if(query_user_number(app, &times_bar)) {
+                    int32_t times = str_to_int_s(times_bar.string);
+                    for(int32_t i = 0; i < times; ++i) {
+                        nj_play_keyboard_macro_from_register(app, current_register);
                     }
                 }
             }
             else {
                 print_message(app, literal("Register ["));
-                print_message(app, bar.string.str, bar.string.size);
+                print_message(app, register_bar.string.str, register_bar.string.size);
                 print_message(app, literal("] is invalid.\n"));
             }
         }
@@ -385,25 +410,6 @@ CUSTOM_DOC("Execute a 'long form' command.")
             print_message(app, bar.string.str, bar.string.size);
             print_message(app, literal("\n"));
         }
-    }
-}
-
-CUSTOM_COMMAND_SIG(nj_duplicate_line)
-CUSTOM_DOC("Duplicates the line under the cursor."){
-    uint32_t access = AccessOpen;
-    View_Summary view = get_active_view(app, access);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    
-    int32_t min = seek_line_beginning(app, &buffer, view.cursor.pos);
-    int32_t max = seek_line_end(app, &buffer, view.cursor.pos) + 1;
-    int32_t size = max - min;
-    if (size + 1 <= app->memory_size){
-        char *mem = (char*)app->memory;
-        mem[0] = '\n';
-        
-        buffer_read_range(app, &buffer, min, max, mem + 1);
-        
-        write_string(app, make_string(mem, sizeof(char)*(size + 1)));
     }
 }
 
@@ -887,18 +893,6 @@ CUSTOM_DOC("Delete characters between the cursor position and the first alphanum
         
         buffer_replace_range(app, &buffer, pos1, pos2, 0, 0);
     }
-}
-
-CUSTOM_COMMAND_SIG(nj_delete_line)
-CUSTOM_DOC("Deletes the line under the cursor."){
-    uint32_t access = AccessOpen;
-    View_Summary view = get_active_view(app, access);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    
-    int32_t min = seek_line_beginning(app, &buffer, view.cursor.pos);
-    int32_t max = seek_line_end(app, &buffer, view.cursor.pos) + 1;
-    
-    buffer_replace_range(app, &buffer, min, max, 0, 0);
 }
 
 CUSTOM_COMMAND_SIG(nj_cut_line)
