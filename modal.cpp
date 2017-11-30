@@ -52,6 +52,7 @@ enum NJ_Mapid {
 #define NJ_MODE_MAPID(mode) NJ_MODE_MAPID_(mode)
 
 NJ_Mapid nj_previous_mapid;
+NJ_Mapid nj_current_mapid;
 
 #define NJ_MODE_STATE_(mode) nj_mode_state_##mode
 #define NJ_MODE_STATE(mode)  NJ_MODE_STATE_(mode)
@@ -68,9 +69,8 @@ static void mode_enter_##mode(struct Application_Links *app, int buffer_id){    
     unsigned int access = AccessAll;                                                                                                                    \
     Buffer_Summary buffer;                                                                                                                              \
     buffer = get_buffer(app, buffer_id, access);                                                                                                        \
-    NJ_Mapid current_mapid;                                                                                                                             \
-    buffer_get_setting(app, &buffer, BufferSetting_MapID, (int32_t *)&current_mapid);                                                                   \
-    if(current_mapid != mapid_##mode) nj_previous_mapid = current_mapid;                                                                                \
+    buffer_get_setting(app, &buffer, BufferSetting_MapID, (int32_t *)&nj_current_mapid);                                                                \
+    if(nj_current_mapid != mapid_##mode) nj_previous_mapid = nj_current_mapid;                                                                          \
     buffer_set_setting(app, &buffer, BufferSetting_MapID, mapid_##mode);                                                                                \
     Theme_Color colors[] =  {                                                                                                                           \
         { Stag_Back,          color_bg         },                                                                                                       \

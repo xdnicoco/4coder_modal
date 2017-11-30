@@ -86,7 +86,8 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'r', MDFR_NONE, nj_mode_enter_chord_replace_single);
     bind(context, 'R', MDFR_NONE, nj_mode_enter_replace);
     
-    bind(context, 'Q', MDFR_NONE, exit_4coder);
+    bind(context, 'q', MDFR_NONE, nj_record_keyboard_macro);
+    bind(context, 'Q', MDFR_NONE, nj_play_keyboard_macro);
     
     bind(context, key_back, MDFR_SHIFT, nj_backspace_line);
     
@@ -123,6 +124,141 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal);
     bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings);
     end_map(context);
+}
+
+static bool32 nj_recording_macro = false;
+struct NJ_Input_Node {
+    User_Input input;
+    NJ_Input_Node *n;
+};
+struct NJ_Input_Register {
+    bool32 initialized;
+    NJ_Input_Node root;
+    NJ_Mapid initial_mapid;
+};
+NJ_Input_Register nj_macro_registers[10] = {0};
+
+// TODO(NJ): Crahes when other command (like I-Search) tries to get user-input.
+CUSTOM_COMMAND_SIG(nj_record_keyboard_macro)
+CUSTOM_DOC("Starts to record a keyboard macro mode.")
+{
+    User_Input in = {0};
+    bool32 macro_is_initialized = false;
+    nj_recording_macro = true;
+    int32_t current_register = 0;
+    NJ_Input_Node *current_node = 0;
+    print_message(app, literal("Enter a macro register number: "));
+    
+    for(;;) {
+        in = get_user_input(app, EventOnAnyKey, 0);
+        
+        if(((char)in.key.character == 'Q') && in.key.modifiers[MDFR_CTRL]) {
+            print_message(app, literal("Macro finished recording.\n"));
+            break;
+        }
+        
+        
+#if 0
+        { // NOTE(NJ): debugging data
+            char msg[256];
+            sprintf(msg, "Input: key = %c, command = %p\n", in.key.character, in.command.command);
+            print_message(app, msg, str_size(msg));
+        }
+#endif
+        
+        if(!macro_is_initialized) {
+            if(char_is_numeric((char)in.key.character)) {
+                char input_character[] = {(char)in.key.character, 0}; // IMPORTANT(NJ): NULL terminate your c strings :(
+                current_register = str_to_int_c(input_character);
+                
+                print_message(app, literal("Recording a keyboard macro to register ["));
+                print_message(app, input_character, 1);
+                print_message(app, literal("]\n"));
+                
+                if(nj_macro_registers[current_register].initialized){
+                    current_node = nj_macro_registers[current_register].root.n;
+                    while(current_node){
+                        NJ_Input_Node *temp = current_node->n;
+                        memory_free(app, current_node, sizeof(NJ_Input_Node));
+                        current_node = temp;
+                    }
+                }
+                
+                nj_macro_registers[current_register].initialized = false;
+                macro_is_initialized = true;
+            }
+            else if(in.key.keycode == key_esc) {
+                print_message(app, literal("Macro recording canceled.\n"));
+                break;
+            }
+            else {
+                print_message(app, literal("A number between 0 to 9 is required\n"));
+            }
+        }
+        else {
+            if(!nj_macro_registers[current_register].initialized)
+            {
+                nj_macro_registers[current_register].initialized = true;
+                nj_macro_registers[current_register].initial_mapid = nj_current_mapid;
+                nj_macro_registers[current_register].root.input = in;
+                current_node = &nj_macro_registers[current_register].root;
+            }
+            else {
+                // TODO(NJ): Maybe a better way to allocate memory?
+                current_node->n = (NJ_Input_Node *)memory_allocate(app, sizeof(NJ_Input_Node));
+                current_node = current_node->n;
+                current_node->n = 0;
+                current_node->input = in;
+            }
+            
+            in.command.command(app);
+        }
+    }
+    
+    nj_recording_macro = false;
+}
+
+CUSTOM_COMMAND_SIG(nj_play_keyboard_macro)
+CUSTOM_DOC("Plays a keyboard macro mode from a given register.")
+{
+    print_message(app, literal("Enter a macro register number :"));
+    User_Input in = {0};
+    
+    for(;;){
+        in = get_user_input(app, EventOnAnyKey, 0);
+        
+        if(char_is_numeric((char)in.key.character)) {
+            char input_character[] = {(char)in.key.character, 0}; // IMPORTANT(NJ): NULL terminate your c strings :(
+            uint32_t current_register = str_to_int_c(input_character);
+            
+            print_message(app, literal("Playing a keyboard macro from register ["));
+            print_message(app, input_character, 1);
+            print_message(app, literal("]\n"));
+            
+            if(nj_macro_registers[current_register].initialized){
+                nj_activate_mode_by_mapid(app, nj_macro_registers[current_register].initial_mapid);
+                NJ_Input_Node *current_node = &nj_macro_registers[current_register].root;
+                while(current_node){
+                    // HACK(NJ): Currently emulating write_character
+                    // TODO(NJ): Find a way to change the user input returned from get_command_input;
+                    if(current_node->input.command.command == write_character){
+                        uint8_t character[4];
+                        uint32_t length = to_writable_character(current_node->input, character);
+                        write_character_parameter(app, character, length);
+                    }
+                    else {
+                        current_node->input.command.command(app);
+                    }
+                    current_node = current_node->n;
+                }
+            }
+            break;
+        }
+        else if(in.key.keycode == key_esc) {
+            print_message(app, literal("Macro playback canceled.\n"));
+            break;
+        }
+    }
 }
 
 static void nj_execute_a_cli_command(Application_Links *app, String cmd, String output_buffer_name)
