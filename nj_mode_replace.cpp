@@ -1,5 +1,6 @@
 /*
-This mode replaces the character under the curser with the characters pressed.
+This mode replaces the character under the cursor with the characters pressed.
+This whole mode is a hack, very buggy and in general should not be used yet.
 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
@@ -58,10 +59,13 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context); //mapid_replace
 }
 
-
+/*
+The following command is stolen from ChronalDragon's 4vim.
+   For more details check https://github.com/Chronister/4vim/
+*/
 CUSTOM_COMMAND_SIG(nj_replace_character)
 CUSTOM_DOC("Replaces the character under the cursor with whatever character was used to trigger this command."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -113,7 +117,6 @@ nj_replace_mode_clipboard_cut(Application_Links *app, int32_t start, int32_t end
 CUSTOM_COMMAND_SIG(nj_replace_mode_snipe_token_or_word)
 CUSTOM_DOC("Replaces a single, whole token on or to the left of the cursor with spaces."){
     uint32_t access = AccessOpen;
-    
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -126,7 +129,6 @@ CUSTOM_DOC("Replaces a single, whole token on or to the left of the cursor with 
 CUSTOM_COMMAND_SIG(nj_replace_mode_cut_token_or_word)
 CUSTOM_DOC("Copies a single, whole token on or to the left of the cursor, then replaces it with spaces."){
     uint32_t access = AccessOpen;
-    
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -146,7 +148,7 @@ CUSTOM_DOC("Copies the range to clipboard, then replaces it with spaces"){
 
 CUSTOM_COMMAND_SIG(nj_replace_mode_cut_line)
 CUSTOM_DOC("Copies the line under the cursor to clipboard, then replaces it with spaces"){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -155,9 +157,10 @@ CUSTOM_DOC("Copies the line under the cursor to clipboard, then replaces it with
 
 CUSTOM_COMMAND_SIG(nj_replace_mode_paste)
 CUSTOM_DOC("At the cursor, replace the text to the right of the cursor with the text at the top of the clipboard."){
-    uint32_t access = AccessOpen;
     int32_t count = clipboard_count(app, 0);
+    
     if (count > 0){
+        uint32_t access = AccessOpen;
         View_Summary view = get_active_view(app, access);
         
         view_paste_index[view.view_id].next_rewrite = RewritePaste;
@@ -192,9 +195,10 @@ CUSTOM_DOC("At the cursor, replace the text to the right of the cursor with the 
 
 CUSTOM_COMMAND_SIG(nj_replace_mode_paste_next)
 CUSTOM_DOC("TODO"){
-    uint32_t access = AccessOpen;
     int32_t count = clipboard_count(app, 0);
+    
     if (count > 0){
+        uint32_t access = AccessOpen;
         View_Summary view = get_active_view(app, access);
         
         if (view_paste_index[view.view_id].rewrite == RewritePaste){

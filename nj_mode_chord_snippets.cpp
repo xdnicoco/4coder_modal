@@ -149,7 +149,7 @@ CUSTOM_DOC("At the end of the line, insert a 'return();', then activate insert m
     exec_command(app, seek_end_of_textual_line);
     char str[] = "\nreturn();";
     
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     buffer_replace_range(app, &buffer, view.cursor.pos, view.cursor.pos, str, str_size(str));
@@ -358,11 +358,11 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a '\\', then return 
 
 CUSTOM_COMMAND_SIG(nj_toggle_comment_line)
 CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then move the cursor to the next line."){
-    exec_command(app, seek_beginning_of_textual_line);
-    View_Summary view = get_active_view(app, AccessOpen);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    int32_t pos = view.cursor.pos;
+    int32_t pos = seek_line_beginning(app, &buffer, view.cursor.pos);
     if(buffer_get_char(app, &buffer, pos) == '/' &&
        buffer_get_char(app, &buffer, pos + 1) == '/') {
         buffer_replace_range(app, &buffer, pos, pos + 2, 0, 0);
@@ -370,8 +370,7 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
     else {
         write_string(app, make_lit_string("// "));
     }
-    exec_command(app, seek_end_of_textual_line);
-    exec_command(app, move_right);
+    exec_command(app, move_down_textual);
 }
 
 CUSTOM_COMMAND_SIG(nj_toggle_comment_line_then_prev)

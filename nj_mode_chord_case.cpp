@@ -1,6 +1,7 @@
 /*
-This mode binds the functions to set up the case of the token or the selected range.
-
+This mode binds the functions to set up the case (upper, lower, or camel)
+ of the token or the selected range.
+ 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
  either express or implied, including without limitation any implied warranties of condition,
@@ -48,8 +49,9 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
 CUSTOM_COMMAND_SIG(nj_chord_case_upper)
 CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark to uppercase, then return to the previous mode.")
 {
-    View_Summary view = get_active_view(app, AccessOpen);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
     Range range = get_range(&view);
     int32_t size = range.max - range.min;
@@ -68,8 +70,9 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
 CUSTOM_COMMAND_SIG(nj_chord_case_lower)
 CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark to lowercase, then return to the previous mode.")
 {
-    View_Summary view = get_active_view(app, AccessOpen);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
     Range range = get_range(&view);
     int32_t size = range.max - range.min;
@@ -88,8 +91,9 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
 CUSTOM_COMMAND_SIG(nj_chord_case_camel)
 CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark to camelcase then return to the previous mode.")
 {
-    View_Summary view = get_active_view(app, AccessOpen);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
     Range range = get_range(&view);
     int32_t size = range.max - range.min;
@@ -106,19 +110,19 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_case_upper_token_or_word)
-CUSTOM_DOC("Selects the token or word under the curser and converts all ascii text to uppercase and return to the previous mode.")
+CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii text to uppercase and return to the previous mode.")
 {
     exec_command(app, nj_select_token_or_word);
     exec_command(app, nj_chord_case_upper);
 }
 CUSTOM_COMMAND_SIG(nj_chord_case_lower_token_or_word)
-CUSTOM_DOC("Selects the token or word under the curser and converts all ascii text to lowercase and return to the previous mode.")
+CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii text to lowercase and return to the previous mode.")
 {
     exec_command(app, nj_select_token_or_word);
     exec_command(app, nj_chord_case_lower);
 }
 CUSTOM_COMMAND_SIG(nj_chord_case_camel_token_or_word)
-CUSTOM_DOC("Selects the token or word under the curser and converts all ascii text to camelcase and return to the previous mode.")
+CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii text to camelcase and return to the previous mode.")
 {
     exec_command(app, nj_select_token_or_word);
     exec_command(app, nj_chord_case_camel);

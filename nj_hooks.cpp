@@ -1,6 +1,6 @@
 /*
  nj 4coder custom hooks
-Here I setup 4coder so it will support the modes.
+Here I setup 4coder so it will support the modal extension.
 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,

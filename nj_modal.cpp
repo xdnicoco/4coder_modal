@@ -1,7 +1,7 @@
 /*
  nj 4coder custom configuration
  This is the main file that binds all the modal functions.
-This is an experimental way for me to use file in terms of modules and it's far from perfect,
+This is an experimental way to use files in terms of modules and it is far from perfect,
 but that's how I do it.
 Also, some of the bindings are specified here (that is bindings that are not for the keymap id
 of one of the modes).
@@ -252,7 +252,7 @@ nj_keys(Bind_Helper *context){
     bind(context, ';',  MDFR_ALT,  nj_chord_snippet_eol_semicolon);
     bind(context, '\\', MDFR_ALT,  nj_chord_snippet_eol_backslash);
     bind(context, 'c',  MDFR_CTRL, copy);
-    bind(context, '2',  MDFR_ALT,  nj_open_matching_file_cpp_current_panel);
+    bind(context, '2',  MDFR_ALT,  nj_open_matching_file_cpp_same_panel);
     bind(context, '@',  MDFR_ALT,  open_matching_file_cpp);
     bind(context, 'a',  MDFR_CTRL, select_all);
     bind(context, 'a',  MDFR_ALT,  nj_ocd_equals);

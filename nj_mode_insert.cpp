@@ -60,8 +60,10 @@ CUSTOM_DOC("Inserts a newline after the line under the cursor, then activates in
 
 CUSTOM_COMMAND_SIG(nj_insert_after)
 CUSTOM_DOC("Moves to the next character in the current line, then activates insert mode."){
-    View_Summary view = get_active_view(app, AccessOpen);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessOpen);
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
     char nextch[2];
     int pos = view.cursor.pos;
     buffer_read_range(app, &buffer, pos, pos + 1, nextch);

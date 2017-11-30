@@ -1,5 +1,5 @@
 /*
-This mode replaces the character under the curser with
+This mode replaces the character under the cursor with
 the next character pressed after activating it, then returns to the previous mode.
 
 WARNING:
@@ -50,7 +50,7 @@ CUSTOM_DOC("Replaces the character under the cursor with the pressed character, 
 
 CUSTOM_COMMAND_SIG(nj_mode_chord_replace_single_paste_then_prev)
 CUSTOM_DOC("Removes the character under the cursor, then paste from the clipboard and return to the previous mode."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     

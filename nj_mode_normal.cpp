@@ -113,7 +113,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, '\t', MDFR_NONE,  word_complete);
     
     bind(context, '1', MDFR_NONE, open_file_in_quotes);
-    bind(context, '2', MDFR_NONE, nj_open_matching_file_cpp_current_panel);
+    bind(context, '2', MDFR_NONE, nj_open_matching_file_cpp_same_panel);
     bind(context, '@', MDFR_NONE, open_matching_file_cpp);
     bind(context, '3', MDFR_NONE, nj_mode_enter_chord_snippets);
     bind(context, '4', MDFR_NONE, nj_mode_enter_chord_case);
@@ -258,7 +258,7 @@ CUSTOM_DOC("Execute a 'long form' command.")
 
 CUSTOM_COMMAND_SIG(nj_duplicate_line)
 CUSTOM_DOC("Duplicates the line under the cursor."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -276,7 +276,7 @@ CUSTOM_DOC("Duplicates the line under the cursor."){
 }
 
 void nj_ocd(Application_Links *app, char *seek, int32_t len){
-    uint32_t access = AccessAll;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -368,7 +368,7 @@ CUSTOM_DOC("Queries for an arbitrary character, then aligns it to be on the same
 }
 
 void nj_replace_rectangle_function(Application_Links *app, char *str, int32_t len){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -400,10 +400,7 @@ void nj_replace_rectangle_function(Application_Links *app, char *str, int32_t le
     
     Buffer_Edit *edits = push_array(part, Buffer_Edit, line_count);
     
-    for(int32_t i = 0;
-        i < line_count;
-        ++i)
-    {
+    for(int32_t i = 0; i < line_count; ++i) {
         Buffer_Seek min_seek = seek_line_char(min_line_index + i, min_char_index);
         Buffer_Seek max_seek = seek_line_char(min_line_index + i, max_char_index);
         
@@ -443,18 +440,6 @@ CUSTOM_DOC("Replaces the range in a rectangular fashion."){
     }
 }
 
-CUSTOM_COMMAND_SIG(nj_exchange_mark_and_cursor)
-CUSTOM_DOC("Exchanges the mark and the curser positions."){
-    uint32_t access = AccessProtected;
-    View_Summary view = get_active_view(app, access);
-    
-    uint32_t cursor_pos = view.cursor.pos;
-    uint32_t mark_pos = view.mark.pos;
-    
-    view_set_mark(app, &view, seek_pos(cursor_pos));
-    view_set_cursor(app, &view, seek_pos(mark_pos), 1);
-}
-
 CUSTOM_COMMAND_SIG(nj_write_arrow)
 CUSTOM_DOC("Writes \"->\" under the cursor."){
     write_string(app, make_lit_string("->"));
@@ -462,7 +447,7 @@ CUSTOM_DOC("Writes \"->\" under the cursor."){
 
 CUSTOM_COMMAND_SIG(nj_toggler)
 CUSTOM_DOC("Replaces the character under the cursor with a complementory character, for example replaces 0 with 1, replaces . with ->, replaces lowercase withh uppercase and vice versa etc."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     int32_t pos = view.cursor.pos;
@@ -637,7 +622,7 @@ CUSTOM_DOC("Replaces the character under the cursor with a complementory charact
 
 CUSTOM_COMMAND_SIG(nj_increment_digit_decimal)
 CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back to 0."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     int32_t pos = view.cursor.pos;
@@ -652,7 +637,7 @@ CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back 
 
 CUSTOM_COMMAND_SIG(nj_decrement_digit_decimal)
 CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back to 9."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     int32_t pos = view.cursor.pos;
@@ -667,7 +652,7 @@ CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back 
 
 CUSTOM_COMMAND_SIG(nj_increment_digit_hexadecimal)
 CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back to 0."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     int32_t pos = view.cursor.pos;
@@ -682,7 +667,7 @@ CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back 
 
 CUSTOM_COMMAND_SIG(nj_decrement_digit_hexadecimal)
 CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back to 9."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     int32_t pos = view.cursor.pos;
@@ -695,16 +680,15 @@ CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back 
     }
 }
 
-CUSTOM_COMMAND_SIG(nj_open_matching_file_cpp_current_panel)
+CUSTOM_COMMAND_SIG(nj_open_matching_file_cpp_same_panel)
 CUSTOM_DOC("If the current file is a *.cpp or *.h, attempts to open the corresponding *.h or *.cpp file in the current view."){
-    View_Summary view = get_active_view(app, AccessAll);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, AccessAll);
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
     Buffer_Summary new_buffer = {0};
     if (get_cpp_matching_file(app, buffer, &new_buffer)){
-        //get_view_next_looped(app, &view, AccessAll);
         view_set_buffer(app, &view, new_buffer.buffer_id, 0);
-        //set_active_view(app, &view);
     }
 }
 
@@ -775,7 +759,7 @@ CUSTOM_DOC("Delete characters between the cursor position and the first alphanum
 
 CUSTOM_COMMAND_SIG(nj_delete_line)
 CUSTOM_DOC("Deletes the line under the cursor."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
@@ -787,7 +771,7 @@ CUSTOM_DOC("Deletes the line under the cursor."){
 
 CUSTOM_COMMAND_SIG(nj_cut_line)
 CUSTOM_DOC("Cuts the line under the cursor."){
-    uint32_t access = AccessProtected;
+    uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     

@@ -1,5 +1,5 @@
 /*
-This mode set the curser to a specific line number (absolute or relative to the current cursor's line).
+This mode sets the cursor to a specific line number (absolute or relative to the current cursor's line).
 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
@@ -25,7 +25,7 @@ struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE){
 };
 
 #define NJ_MODE_PRINT_ENTER_HOOK \
-View_Summary view = get_active_view(app, AccessProtected);\
+View_Summary view = get_active_view(app, AccessAll);\
 NJ_MODE_STATE(NJ_CURRENT_MODE).line_input = 0;\
 NJ_MODE_STATE(NJ_CURRENT_MODE).last_position = view.cursor;\
 NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_absolute;
