@@ -370,7 +370,8 @@ CUSTOM_DOC("Execute a 'long form' command.")
              match_ss(bar.string, make_lit_string("open *"))){
         open_all_code(app);
     }
-    else if (match_ss(bar.string, make_lit_string("open all code recursive"))){
+    else if (match_ss(bar.string, make_lit_string("open all code recursive")) ||
+             match_ss(bar.string, make_lit_string("open * -r"))){
         open_all_code_recursive(app);
     }
     else if(match_ss(bar.string, make_lit_string("close all code"))){
