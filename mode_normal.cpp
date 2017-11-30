@@ -132,13 +132,16 @@ struct NJ_Input_Node {
     User_Input input;
     NJ_Input_Node *n;
 };
-struct NJ_Input_Register {
+struct NJ_Macro_Register {
     bool32 initialized;
     NJ_Input_Node root;
 };
-NJ_Input_Register nj_macro_registers[10] = {0};
+NJ_Macro_Register nj_macro_registers[10] = {0};
 
-// TODO(NJ): Crahes when other command (like I-Search) tries to get user-input.
+//
+// HACK(NJ): Crahes when other command (like I-Search) tries to get user-input.
+//
+
 CUSTOM_COMMAND_SIG(nj_start_recording_keyboard_macro)
 CUSTOM_DOC("Starts to record a keyboard macro mode.") {
     Query_Bar query_bar = {0};
