@@ -262,7 +262,7 @@ nj_keys(Bind_Helper *context){
     bind(context, 'd',  MDFR_CTRL, duplicate_line);
     bind(context, 'e',  MDFR_CTRL, center_view);
     bind(context, 'E',  MDFR_CTRL, left_adjust_view);
-    bind(context, 'e',  MDFR_ALT,  nj_snipe_token_or_word);
+    bind(context, 'e',  MDFR_ALT,  snipe_token_or_word_right);
     bind(context, 'f',  MDFR_CTRL, toggle_fullscreen);
     bind(context, 'g',  MDFR_ALT,  nj_mode_enter_chord_goto);
     
@@ -306,8 +306,12 @@ nj_keys(Bind_Helper *context){
     bind(context, '8', MDFR_ALT,  nj_mode_enter_chord_settings);
     
     bind(context, '!', MDFR_ALT,  nj_execute_any_cli);
-    bind(context, '~', MDFR_CTRL, nj_execute_arbitrary_command);
     bind(context, ':', MDFR_CTRL, nj_execute_arbitrary_command);
+    
+    bind(context, 'q', MDFR_ALT,  nj_start_recording_keyboard_macro);
+    bind(context, 'Q', MDFR_CTRL, nj_finish_recording_keyboard_macro);
+    bind(context, '`', MDFR_ALT,  nj_play_last_keyboard_macro);
+    bind(context, '~', MDFR_ALT,  nj_play_keyboard_macro);
     
     bind(context, '\n', MDFR_NONE,  newline_or_goto_position);
     bind(context, '\n', MDFR_SHIFT, newline_or_goto_position_same_panel);

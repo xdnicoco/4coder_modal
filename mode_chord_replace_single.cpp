@@ -43,9 +43,9 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
 
 CUSTOM_COMMAND_SIG(nj_replace_character_then_prev)
 CUSTOM_DOC("Replaces the character under the cursor with the pressed character, then return to the previous mode."){
-    exec_command(app, nj_replace_character);
-    exec_command(app, move_left);
-    exec_command(app, nj_activate_previous_mode);
+    nj_replace_character(app);
+    move_left(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_mode_chord_replace_single_paste_then_prev)
@@ -57,8 +57,8 @@ CUSTOM_DOC("Removes the character under the cursor, then paste from the clipboar
     if(buffer_get_char(app, &buffer, view.cursor.pos) != '\n') {
         delete_char(app);
     }
-    exec_command(app, paste);
-    exec_command(app, nj_activate_previous_mode);
+    paste(app);
+    nj_activate_previous_mode(app);
 }
 
 

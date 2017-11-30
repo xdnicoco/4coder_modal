@@ -89,43 +89,43 @@ nj_chord_snippet_named_comment_string(Application_Links *app, char *type_string)
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_equals_semicolon_then_prev)
 CUSTOM_DOC("At the end of the line, insert a ' = ;', then return to the previous mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     write_string(app, make_lit_string(" = ;"));
-    exec_command(app, move_down_textual);
-    exec_command(app, nj_activate_previous_mode);
+    move_down_textual(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_todo_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// TODO' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "TODO");
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_note_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// NOTE' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "NOTE");
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_hack_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// HACK' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "HACK");
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_important_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// IMPORTANT' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "IMPORTANT");
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_zero_struct_then_prev)
 CUSTOM_DOC("At the end of the line, insert a ' = {0};', then return to the previous mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
@@ -135,8 +135,8 @@ CUSTOM_DOC("At the end of the line, insert a ' = {0};', then return to the previ
         buffer_replace_range(app, &buffer, pos, pos+1, 0, 0);
     }
     write_string(app, make_lit_string(" = {0};"));
-    exec_command(app, move_down_textual);
-    exec_command(app, nj_activate_previous_mode);
+    move_down_textual(app);
+    nj_activate_previous_mode(app);
 }
 
 inline void nj_move_cursor_to_relative_line_then_char(Application_Links *app, int32_t rel_line, int32_t rel_char) {
@@ -146,7 +146,7 @@ inline void nj_move_cursor_to_relative_line_then_char(Application_Links *app, in
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_return_then_insert)
 CUSTOM_DOC("At the end of the line, insert a 'return();', then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     char str[] = "\nreturn();";
     
     uint32_t access = AccessOpen;
@@ -160,7 +160,7 @@ CUSTOM_DOC("At the end of the line, insert a 'return();', then activate insert m
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '}' separated by a blank line, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     char text[] = " {\n\n}";
     long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
@@ -168,7 +168,7 @@ CUSTOM_DOC("At the cursor, insert a '{' and '}' separated by a blank line, then 
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_semicolon_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '};' separated by a blank line, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     char text[] = " {\n\n};";
     long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
@@ -176,7 +176,7 @@ CUSTOM_DOC("At the cursor, insert a '{' and '};' separated by a blank line, then
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_break_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '} break;' separated by a blank line, then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     char text[] = " {\n\n} break;";
     long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
@@ -188,7 +188,7 @@ CUSTOM_DOC("At the cursor, insert a 'case :{' and '} break;' separated by a blan
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -208,7 +208,7 @@ CUSTOM_DOC("At the cursor, insert a 'if(){' and '}' separated by a blank line, t
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -228,7 +228,7 @@ CUSTOM_DOC("At the cursor, insert a 'else if(){' and '}' separated by a blank li
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -248,7 +248,7 @@ CUSTOM_DOC("At the cursor, insert a 'else {' and '}' separated by a blank line, 
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -268,7 +268,7 @@ CUSTOM_DOC("At the cursor, insert a 'for(;;){' and '} ' separated by a blank lin
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -288,7 +288,7 @@ CUSTOM_DOC("At the cursor, insert a 'while(){' and '} ' separated by a blank lin
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -309,7 +309,7 @@ CUSTOM_DOC("At the cursor, insert a 'switch(){' and '} ' separated by a blank li
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     
     char *text;
     if(buffer_get_char(app, &buffer, view.cursor.pos - 1) == '\n' && buffer_get_char(app, &buffer, view.cursor.pos) == '\n') {
@@ -327,33 +327,33 @@ CUSTOM_DOC("At the cursor, insert a 'switch(){' and '} ' separated by a blank li
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_block_then_insert)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ' /*  */', then activate insert mode."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     write_string(app, make_lit_string(" /*  */"));
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_semicolon)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ';'."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     write_string(app, make_lit_string(";"));
-    exec_command(app, move_down_textual);
+    move_down_textual(app);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_semicolon_then_prev)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ';', then return to the previous mode."){
-    exec_command(app, nj_chord_snippet_eol_semicolon);
-    exec_command(app, nj_activate_previous_mode);
-    exec_command(app, move_down_textual);
+    nj_chord_snippet_eol_semicolon(app);
+    nj_activate_previous_mode(app);
+    move_down_textual(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash)
 CUSTOM_DOC("At the end of the line under the cursor, insert a '\\'."){
-    exec_command(app, seek_end_of_textual_line);
+    seek_end_of_textual_line(app);
     write_string(app, make_lit_string("\\"));
-    exec_command(app, move_down_textual);
+    move_down_textual(app);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash_then_prev)
 CUSTOM_DOC("At the end of the line under the cursor, insert a '\\', then return to the previous mode."){
-    exec_command(app, nj_chord_snippet_eol_backslash);
-    exec_command(app, nj_activate_previous_mode);
+    nj_chord_snippet_eol_backslash(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_toggle_comment_line)
@@ -370,13 +370,13 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
     else {
         write_string(app, make_lit_string("// "));
     }
-    exec_command(app, move_down_textual);
+    move_down_textual(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_toggle_comment_line_then_prev)
 CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then move the cursor to the next line and return to the previous mode."){
-    exec_command(app, nj_toggle_comment_line);
-    exec_command(app, nj_activate_previous_mode);
+    nj_toggle_comment_line(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_include_gaurd_file)
@@ -435,8 +435,8 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
 }
 CUSTOM_COMMAND_SIG(nj_include_gaurd_file_then_prev)
 CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the current buffer file name, then return to the previous mode."){
-    exec_command(app, nj_include_gaurd_file);
-    exec_command(app, nj_activate_previous_mode);
+    nj_include_gaurd_file(app);
+    nj_activate_previous_mode(app);
 }
 
 #endif // _MODE_CHORD_SNIPPETS_CPP

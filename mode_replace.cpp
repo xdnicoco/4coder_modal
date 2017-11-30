@@ -78,9 +78,9 @@ CUSTOM_DOC("Replaces the character under the cursor with whatever character was 
 // HACK(NJ): You should be more smart than just undoing twice
 CUSTOM_COMMAND_SIG(nj_replace_mode_backspace)
 CUSTOM_DOC("Undoes the last two operation, then moves to the left. HACKIE AS HELL."){
-    exec_command(app, undo);
-    exec_command(app, undo);
-    exec_command(app, move_left);
+    undo(app);
+    undo(app);
+    move_left(app);
 }
 
 static int32_t
@@ -223,7 +223,7 @@ CUSTOM_DOC("TODO"){
                 Range range = get_range(&view);
                 int32_t pos = range.min;
                 
-                exec_command(app, undo);
+                undo(app);
                 buffer_replace_range(app, &buffer, range.min, range.max, str, len);
                 view_set_cursor(app, &view, seek_pos(pos-1), true);
                 
@@ -235,7 +235,7 @@ CUSTOM_DOC("TODO"){
             }
         }
         else{
-            exec_command(app, nj_replace_mode_paste);
+            nj_replace_mode_paste(app);
         }
     }
 }

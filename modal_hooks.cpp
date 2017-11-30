@@ -86,7 +86,7 @@ OPEN_FILE_HOOK_SIG(nj_new_file){
     String ext = file_extension(make_string(buffer.file_name, buffer.file_name_len));
     View_Summary view = get_active_view(app, access);
     if(match_insensitive_sc(ext, "h") || match_insensitive_sc(ext, "hpp")){
-        exec_command(app, nj_include_gaurd_file);
+        nj_include_gaurd_file(app);
         view_set_cursor(app, &view, seek_line_char(3, 0), 1);
     }
     
@@ -105,7 +105,7 @@ OPEN_FILE_HOOK_SIG(nj_file_save){
         }
     }
 #endif
-    exec_command(app, clean_all_lines);
+    clean_all_lines(app);
     
     // no meaning for return
     return(0);

@@ -63,50 +63,50 @@ CUSTOM_DOC("Toggles the visibility status of the current view's scrollbar."){
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_open_color_tweaker_then_prev)
 CUSTOM_DOC("Opens the 4coder color tweaker, then go back to the previous mode."){
-    exec_command(app, open_color_tweaker);
-    exec_command(app, nj_activate_previous_mode);
+    open_color_tweaker(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_scrollbar_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's scrollbar, then go back to the previous mode."){
-    exec_command(app, toggle_scrollbar);
-    exec_command(app, nj_activate_previous_mode);
+    toggle_scrollbar(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_filebar_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's filebar, then go back to the previous mode."){
-    exec_command(app, toggle_filebar);
-    exec_command(app, nj_activate_previous_mode);
+    toggle_filebar(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_fullscreen_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's fullscreen, then go back to the previous mode."){
-    exec_command(app, toggle_fullscreen);
-    exec_command(app, nj_activate_previous_mode);
+    toggle_fullscreen(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_line_wrap_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's line wrap, then go back to the previous mode."){
-    exec_command(app, toggle_line_wrap);
-    exec_command(app, nj_activate_previous_mode);
+    toggle_line_wrap(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_virtual_whitespace_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's virtual whitespace, then go back to the previous mode."){
-    exec_command(app, toggle_virtual_whitespace);
-    exec_command(app, nj_activate_previous_mode);
+    toggle_virtual_whitespace(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_show_whitespace_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's whitespace, then go back to the previous mode."){
-    exec_command(app, toggle_show_whitespace);
-    exec_command(app, nj_activate_previous_mode);
+    toggle_show_whitespace(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_clean_lines_then_prev)
 CUSTOM_DOC("Removes trailing whitespace from all lines in the current buffer, then go back to previous mode."){
-    exec_command(app, clean_all_lines);
-    exec_command(app, nj_activate_previous_mode);
+    clean_all_lines(app);
+    nj_activate_previous_mode(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_set_modal_color_theme){
@@ -189,8 +189,8 @@ CUSTOM_COMMAND_SIG(nj_set_modal_color_theme){
 CUSTOM_COMMAND_SIG(nj_chord_settings_invert_colors_then_prev)
 CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
     nj_theme_colors_inverted = !nj_theme_colors_inverted;
-    exec_command(app, nj_set_modal_color_theme);
-    exec_command(app, nj_activate_previous_mode);
+    nj_set_modal_color_theme(app);
+    nj_activate_previous_mode(app);
 }
 
 #endif // _MODE_CHORD_SETTINGS

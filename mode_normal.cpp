@@ -36,7 +36,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
     inherit_map(context, mapid_movements);
     bind(context, 'e', MDFR_NONE, delete_char);
-    bind(context, 'E', MDFR_NONE, nj_snipe_token_or_word);
+    bind(context, 'E', MDFR_NONE, snipe_token_or_word_right);
     
     bind(context, 'i', MDFR_NONE, nj_mode_enter_insert);
     bind(context, 'I', MDFR_NONE, nj_mode_enter_chord_insert_single);
@@ -87,7 +87,6 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'R', MDFR_NONE, nj_mode_enter_replace);
     
     bind(context, 'q', MDFR_NONE, nj_start_recording_keyboard_macro);
-    bind(context, 'Q', MDFR_CTRL, nj_finish_recording_keyboard_macro);
     bind(context, '`', MDFR_NONE, nj_play_last_keyboard_macro);
     bind(context, '~', MDFR_NONE, nj_play_keyboard_macro);
     
@@ -189,7 +188,10 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                     print_message(app, msg, str_size(msg));
                 }
 #endif
-                if(in.command.command)
+                if(in.command.command &&
+                   (in.command.command != nj_start_recording_keyboard_macro) &&
+                   (in.command.command != nj_play_keyboard_macro) &&
+                   (in.command.command != nj_play_last_keyboard_macro))
                 {
                     if(!nj_macro_registers[current_register].initialized)
                     {
@@ -401,14 +403,14 @@ CUSTOM_DOC("Execute a 'long form' command.")
         make_directory_query(app);
     }
     else if (match_ss(bar.string, make_lit_string("wq"))){
-        exec_command(app, save);
-        exec_command(app, exit_4coder);
+        save(app);
+        exit_4coder(app);
     }
     else if (match_ss(bar.string, make_lit_string("w"))){
-        exec_command(app, save);
+        save(app);
     }
     else if (match_ss(bar.string, make_lit_string("q"))){
-        exec_command(app, exit_4coder);
+        exit_4coder(app);
     }
     else{
         bool32 command_sig_found = false;
@@ -420,7 +422,7 @@ CUSTOM_DOC("Execute a 'long form' command.")
             if(match_sc(bar.string, fcoder_metacmd_table[i].name))
             {
                 command_sig_found = true;
-                exec_command(app, fcoder_metacmd_table[i].proc);
+                fcoder_metacmd_table[i].proc(app);
                 break;
             }
         }
@@ -888,7 +890,7 @@ CUSTOM_DOC("Delete characters between the cursor position and the first alphanum
         int32_t pos2 = 0, pos1 = 0;
         
         pos2 = view.cursor.pos;
-        exec_command(app, seek_alphanumeric_or_camel_left);
+        seek_alphanumeric_or_camel_left(app);
         refresh_view(app, &view);
         pos1 = view.cursor.pos;
         
@@ -907,7 +909,7 @@ CUSTOM_DOC("Delete characters between the cursor position and the first alphanum
         int32_t pos2 = 0, pos1 = 0;
         
         pos1 = view.cursor.pos;
-        exec_command(app, seek_alphanumeric_or_camel_right);
+        seek_alphanumeric_or_camel_right(app);
         refresh_view(app, &view);
         pos2 = view.cursor.pos;
         
@@ -924,7 +926,7 @@ CUSTOM_DOC("Cuts the line under the cursor."){
     view_set_mark(app, &view, seek_line_char(view.cursor.line, 0));
     view_set_cursor(app, &view, seek_pos(seek_line_end(app, &buffer, view.cursor.pos) + 1), 1);
     
-    exec_command(app, cut);
+    cut(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_copy_line)
@@ -947,37 +949,23 @@ CUSTOM_DOC("Select a single, whole token on or to the left of the cursor."){
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    int32_t pos1 = buffer_boundary_seek(app, &buffer, view.cursor.pos+1, 0, BoundaryToken | BoundaryWhitespace);
-    int32_t pos2 = buffer_boundary_seek(app, &buffer, pos1,            1, BoundaryToken | BoundaryWhitespace);
+    int32_t pos1 = buffer_boundary_seek(app, &buffer, view.cursor.pos, 1, BoundaryToken | BoundaryWhitespace);
+    int32_t pos2 = buffer_boundary_seek(app, &buffer, pos1,            0, BoundaryToken | BoundaryWhitespace);
     
     view_set_mark(app, &view, seek_pos(pos1));
     view_set_cursor(app, &view, seek_pos(pos2), 1);
 }
 
-CUSTOM_COMMAND_SIG(nj_snipe_token_or_word)
-CUSTOM_DOC("Delete a single, whole token on or to the left of the cursor."){
-    uint32_t access = AccessOpen;
-    
-    View_Summary view = get_active_view(app, access);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    
-    int32_t pos1 = buffer_boundary_seek(app, &buffer, view.cursor.pos+1, 0, BoundaryToken | BoundaryWhitespace);
-    int32_t pos2 = buffer_boundary_seek(app, &buffer, pos1,            1, BoundaryToken | BoundaryWhitespace);
-    
-    Range range = make_range(pos1, pos2);
-    buffer_replace_range(app, &buffer, range.start, range.end, 0, 0);
-}
-
 CUSTOM_COMMAND_SIG(nj_cut_token_or_word)
 CUSTOM_DOC("Cuts a single, whole token on or to the left of the cursor."){
-    exec_command(app, nj_select_token_or_word);
-    exec_command(app, cut);
+    nj_select_token_or_word(app);
+    cut(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_copy_token_or_word)
 CUSTOM_DOC("Copies a single, whole token on or to the left of the cursor."){
-    exec_command(app, nj_select_token_or_word);
-    exec_command(app, copy);
+    nj_select_token_or_word(app);
+    copy(app);
 }
 
 #endif // _MODE_NORMAL_CPP
