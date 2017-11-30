@@ -112,19 +112,40 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
 CUSTOM_COMMAND_SIG(nj_chord_case_upper_token_or_word)
 CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii text to uppercase and return to the previous mode.")
 {
-    nj_select_token_or_word(app);
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    view_set_mark(app, &view, seek_pos(range.min));
+    view_set_cursor(app, &view, seek_pos(range.max), 1);
+    
     nj_chord_case_upper(app);
 }
 CUSTOM_COMMAND_SIG(nj_chord_case_lower_token_or_word)
 CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii text to lowercase and return to the previous mode.")
 {
-    nj_select_token_or_word(app);
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    view_set_mark(app, &view, seek_pos(range.min));
+    view_set_cursor(app, &view, seek_pos(range.max), 1);
+    
     nj_chord_case_lower(app);
 }
 CUSTOM_COMMAND_SIG(nj_chord_case_camel_token_or_word)
 CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii text to camelcase and return to the previous mode.")
 {
-    nj_select_token_or_word(app);
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    view_set_mark(app, &view, seek_pos(range.min));
+    view_set_cursor(app, &view, seek_pos(range.max), 1);
+    
     nj_chord_case_camel(app);
 }
 

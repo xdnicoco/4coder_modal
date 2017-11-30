@@ -64,10 +64,7 @@ CUSTOM_DOC("Moves to the next character in the current line, then activates inse
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    char nextch[2];
-    int pos = view.cursor.pos;
-    buffer_read_range(app, &buffer, pos, pos + 1, nextch);
-    if (nextch[0] != '\n') {
+    if (buffer_get_char(app, &buffer, view.cursor.pos) != '\n') {
         move_right(app);
     }
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE)

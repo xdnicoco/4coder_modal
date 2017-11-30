@@ -118,10 +118,10 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, '@', MDFR_NONE, open_matching_file_cpp);
     bind(context, '3', MDFR_NONE, nj_mode_enter_chord_snippets);
     bind(context, '4', MDFR_NONE, nj_mode_enter_chord_case);
-    bind(context, '5', MDFR_NONE, nj_decrement_digit_decimal);
-    bind(context, '%', MDFR_NONE, nj_decrement_digit_hexadecimal);
-    bind(context, '6', MDFR_NONE, nj_increment_digit_decimal);
-    bind(context, '^', MDFR_NONE, nj_increment_digit_hexadecimal);
+    bind(context, '5', MDFR_NONE, nj_decrement_token_decimal);
+    bind(context, '%', MDFR_NONE, nj_decrement_digit_decimal);
+    bind(context, '6', MDFR_NONE, nj_increment_token_decimal);
+    bind(context, '^', MDFR_NONE, nj_increment_digit_decimal);
     bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings);
     end_map(context);
 }
@@ -618,7 +618,13 @@ CUSTOM_DOC("Replaces the character under the cursor with a complementory charact
         } break;
         
         case '-': {
-            if(buffer_get_char(app, &buffer, pos + 1) == '>'){
+            if(buffer_get_char(app, &buffer, pos + 1) == '-'){
+                buffer_replace_range(app, &buffer, pos, pos + 2, "++", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '-'){
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "++", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos + 1) == '>'){
                 buffer_replace_range(app, &buffer, pos, pos + 2, ".", 1);
             }
             else
@@ -628,7 +634,16 @@ CUSTOM_DOC("Replaces the character under the cursor with a complementory charact
         } break;
         
         case '+': {
-            buffer_replace_range(app, &buffer, pos, pos + 1, "-", 1);
+            if(buffer_get_char(app, &buffer, pos + 1) == '+'){
+                buffer_replace_range(app, &buffer, pos, pos + 2, "--", 2);
+            }
+            else if(buffer_get_char(app, &buffer, pos - 1) == '+'){
+                buffer_replace_range(app, &buffer, pos - 1, pos + 1, "--", 2);
+            }
+            else
+            {
+                buffer_replace_range(app, &buffer, pos, pos + 1, "-", 1);
+            }
         } break;
         
         case '=': {
@@ -780,6 +795,96 @@ CUSTOM_DOC("Replaces the character under the cursor with a complementory charact
     }
 }
 
+static Range nj_get_range_of_token_or_word(Application_Links *app){
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range result;
+    
+    result.max = buffer_boundary_seek(app, &buffer, view.cursor.pos, 1, BoundaryToken | BoundaryWhitespace);
+    result.min = buffer_boundary_seek(app, &buffer, result.max,      0, BoundaryToken );
+    
+    return(result);
+}
+
+CUSTOM_COMMAND_SIG(nj_decrement_token_decimal)
+CUSTOM_DOC("Decrements the number under the cursor."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    int32_t len = range.max - range.min;
+    
+    if(range.min < range.max)
+    {
+        Partition *scratch = &global_part;
+        Temp_Memory temp = begin_temp_memory(scratch);
+        char *token_space = push_array(scratch, char, len+1);
+        buffer_read_range(app, &buffer, range.min, range.max, token_space);
+        String token = make_string_cap(token_space, len, len+1);
+        
+        bool32 minus = false;
+        if(token.str[0] == '-'){
+            minus = true;
+            token = substr_tail(token, 1);
+        }
+        else if(token.str[0] == '+') {
+            token = substr_tail(token, 1);
+        }
+        
+        if(str_is_int_s(token)){
+            int32_t number = str_to_int_s(token);
+            if(minus) number = -number;
+            --number;
+            int_to_str(&token, number);
+            buffer_replace_range(app, &buffer, range.min, range.max, token.str, token.size);
+        }
+        
+        end_temp_memory(temp);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_increment_token_decimal)
+CUSTOM_DOC("Increments the digit under the cursor."){
+    uint32_t access = AccessOpen;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    int32_t len = range.max - range.min;
+    
+    if(range.min < range.max)
+    {
+        Partition *scratch = &global_part;
+        Temp_Memory temp = begin_temp_memory(scratch);
+        
+        char *token_space = push_array(scratch, char, len+1);
+        buffer_read_range(app, &buffer, range.min, range.max, token_space);
+        String token = make_string_cap(token_space, len, len+1);
+        
+        bool32 minus = false;
+        if(token.str[0] == '-'){
+            minus = true;
+            token = substr_tail(token, 1);
+        }
+        else if(token.str[0] == '+') {
+            token = substr_tail(token, 1);
+        }
+        
+        if(str_is_int_s(token)){
+            int32_t number = str_to_int_s(token);
+            if(minus) number = -number;
+            ++number;
+            int_to_str(&token, number);
+            buffer_replace_range(app, &buffer, range.min, range.max, token.str, token.size);
+        }
+        
+        end_temp_memory(temp);
+    }
+}
+
 CUSTOM_COMMAND_SIG(nj_increment_digit_decimal)
 CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back to 0."){
     uint32_t access = AccessOpen;
@@ -805,36 +910,6 @@ CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back 
     if(char_is_numeric(c)){
         i32_4tech digit = hexchar_to_int(c)-1;
         while(digit < 0) digit += 10;
-        char c_new[1] = {int_to_hexchar(digit)};
-        buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
-    }
-}
-
-CUSTOM_COMMAND_SIG(nj_increment_digit_hexadecimal)
-CUSTOM_DOC("Increment the digit under the cursor, when arriving to 9 loops back to 0."){
-    uint32_t access = AccessOpen;
-    View_Summary view = get_active_view(app, access);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    int32_t pos = view.cursor.pos;
-    char c = buffer_get_char(app, &buffer, pos);
-    if(char_is_hex(c)){
-        i32_4tech digit = hexchar_to_int(c)+1;
-        while(digit >= 16) digit -= 16;
-        char c_new[1] = {int_to_hexchar(digit%16)};
-        buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
-    }
-}
-
-CUSTOM_COMMAND_SIG(nj_decrement_digit_hexadecimal)
-CUSTOM_DOC("Decrement the digit under the cursor, when arriving to 0 loops back to 9."){
-    uint32_t access = AccessOpen;
-    View_Summary view = get_active_view(app, access);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    int32_t pos = view.cursor.pos;
-    char c = buffer_get_char(app, &buffer, pos);
-    if(char_is_hex(c)){
-        i32_4tech digit = hexchar_to_int(c)-1;
-        while(digit < 0) digit += 16;
         char c_new[1] = {int_to_hexchar(digit)};
         buffer_replace_range(app, &buffer, pos, pos + 1, c_new, 1);
     }
@@ -942,29 +1017,25 @@ CUSTOM_DOC("Copies the line under the cursor."){
 }
 
 
-CUSTOM_COMMAND_SIG(nj_select_token_or_word)
-CUSTOM_DOC("Select a single, whole token on or to the left of the cursor."){
-    uint32_t access = AccessProtected;
-    
-    View_Summary view = get_active_view(app, access);
-    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-    
-    int32_t pos1 = buffer_boundary_seek(app, &buffer, view.cursor.pos, 1, BoundaryToken | BoundaryWhitespace);
-    int32_t pos2 = buffer_boundary_seek(app, &buffer, pos1,            0, BoundaryToken | BoundaryWhitespace);
-    
-    view_set_mark(app, &view, seek_pos(pos1));
-    view_set_cursor(app, &view, seek_pos(pos2), 1);
-}
-
 CUSTOM_COMMAND_SIG(nj_cut_token_or_word)
 CUSTOM_DOC("Cuts a single, whole token on or to the left of the cursor."){
-    nj_select_token_or_word(app);
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    view_set_mark(app, &view, seek_pos(range.min));
+    view_set_cursor(app, &view, seek_pos(range.max), 1);
     cut(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_copy_token_or_word)
 CUSTOM_DOC("Copies a single, whole token on or to the left of the cursor."){
-    nj_select_token_or_word(app);
+    uint32_t access = AccessProtected;
+    View_Summary view = get_active_view(app, access);
+    
+    Range range = nj_get_range_of_token_or_word(app);
+    view_set_mark(app, &view, seek_pos(range.min));
+    view_set_cursor(app, &view, seek_pos(range.max), 1);
     copy(app);
 }
 
