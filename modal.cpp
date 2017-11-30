@@ -13,8 +13,8 @@ This custom extension provided "as is" without warranty of any kind,
 */
 
 
-#if !defined(FCODER_NJ_CPP)
-#define FCODER_NJ_CPP
+#if !defined(_MODAL_CPP)
+#define _MODAL_CPP
 //
 // Key Bindings
 //
@@ -403,4 +403,4 @@ nj_keys(Bind_Helper *context){
 #undef NJ_GEN_MODE_KEYMAP
 }
 
-#endif // FCODER_NJ_CPP
+#endif // _MODAL_CPP

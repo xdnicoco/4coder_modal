@@ -7,8 +7,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_CHORD_GOTO_CPP)
-#define NJ_MODE_CHORD_GOTO_CPP
+#if !defined(_MODE_CHORD_GOTO_CPP)
+#define _MODE_CHORD_GOTO_CPP
 
 
 enum NJ_Chord_Goto_State_Mode {
@@ -168,4 +168,4 @@ CUSTOM_DOC("Seek back to the line number before entering chord goto mode, then a
     exec_command(app, nj_activate_previous_mode);
 }
 
-#endif // NJ_MODE_CHORD_GOTO_CPP
+#endif // _MODE_CHORD_GOTO_CPP

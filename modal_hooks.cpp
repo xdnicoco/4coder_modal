@@ -8,8 +8,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(FCODER_NJ_HOOKS_CPP)
-#define FCODER_NJ_HOOKS_CPP
+#if !defined(_MODAL_HOOKS_CPP)
+#define _MODAL_HOOKS_CPP
 
 //
 // Custom Hooks
@@ -26,7 +26,6 @@ nj_4coder_initialized_by_space(Application_Links *app, Buffer_Identifier first_b
     new_view_settings(app, &view);
     view_set_buffer(app, &view, first_id, 0);
     
-#if !defined(IS_WINDOWS)
     // Right Panel
     int32_t view_width  = view.view_region.x1 - view.view_region.x0;
     int32_t view_height  = view.view_region.y1 - view.view_region.y0;
@@ -37,7 +36,6 @@ nj_4coder_initialized_by_space(Application_Links *app, Buffer_Identifier first_b
         View_Summary second_view = get_active_view(app, AccessAll);
         view_set_buffer(app, &second_view, second_id, 0);
     }
-#endif
     
     // Restore Active to Left
     set_active_view(app, &view);
@@ -134,4 +132,4 @@ nj_set_default_hooks(Bind_Helper *context){
     set_scroll_rule(context, smooth_scroll_rule);
 }
 
-#endif // FCODER_NJ_HOOKS_CPP
+#endif // _MODAL_HOOKS_CPP

@@ -8,8 +8,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_CHORD_REPLACE_SINGLE_CPP)
-#define NJ_MODE_CHORD_REPLACE_SINGLE_CPP
+#if !defined(_MODE_CHORD_REPLACE_SINGLE_CPP)
+#define _MODE_CHORD_REPLACE_SINGLE_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
@@ -62,4 +62,4 @@ CUSTOM_DOC("Removes the character under the cursor, then paste from the clipboar
 }
 
 
-#endif // NJ_MODE_CHORD_REPLACE_SINGLE_CPP
+#endif // _MODE_CHORD_REPLACE_SINGLE_CPP

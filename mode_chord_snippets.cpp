@@ -6,8 +6,8 @@ This custom extension provided "as is" without warranty of any kind,
  either express or implied, including without limitation any implied warranties of condition,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
-#if !defined(NJ_MODE_CHORD_SNIPPETS_CPP)
-#define NJ_MODE_CHORD_SNIPPETS_CPP
+#if !defined(_MODE_CHORD_SNIPPETS_CPP)
+#define _MODE_CHORD_SNIPPETS_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
@@ -401,11 +401,11 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     }
     include_gaurd.str[include_gaurd.size] = 0;
     
-    char gaurd_head[include_gaurd_size*2+64];
-    sprintf(gaurd_head, "#if !defined(GAURD_%s)\n#define GAURD_%s\n\n", include_gaurd.str, include_gaurd.str);
+    char gaurd_head[include_gaurd_size*2+32];
+    sprintf(gaurd_head, "#if !defined(_%s)\n#define _%s\n\n", include_gaurd.str, include_gaurd.str);
     
-    char gaurd_tail[include_gaurd_size+32];
-    sprintf(gaurd_tail, "\n\n#endif // GAURD_%s", include_gaurd.str);
+    char gaurd_tail[include_gaurd_size+16];
+    sprintf(gaurd_tail, "\n\n#endif // _%s", include_gaurd.str);
     
     Partition *part = &global_part;
     Temp_Memory temp = begin_temp_memory(part);
@@ -439,4 +439,4 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     exec_command(app, nj_activate_previous_mode);
 }
 
-#endif // NJ_MODE_CHORD_SNIPPETS_CPP
+#endif // _MODE_CHORD_SNIPPETS_CPP

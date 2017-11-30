@@ -7,8 +7,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_CHORD_SETTINGS)
-#define NJ_MODE_CHORD_SETTINGS
+#if !defined(_MODE_CHORD_SETTINGS)
+#define _MODE_CHORD_SETTINGS
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {
     bool32 colors_inverted;
@@ -193,4 +193,4 @@ CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
     exec_command(app, nj_activate_previous_mode);
 }
 
-#endif // NJ_MODE_CHORD_SETTINGS
+#endif // _MODE_CHORD_SETTINGS

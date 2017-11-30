@@ -8,8 +8,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_NORMAL_CPP)
-#define NJ_MODE_NORMAL_CPP
+#if !defined(_MODE_NORMAL_CPP)
+#define _MODE_NORMAL_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
@@ -834,4 +834,4 @@ CUSTOM_DOC("Copies a single, whole token on or to the left of the cursor."){
     exec_command(app, copy);
 }
 
-#endif // NJ_MODE_NORMAL_CPP
+#endif // _MODE_NORMAL_CPP

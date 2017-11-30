@@ -8,8 +8,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_CHORD_INSERT_SINGLE_CPP)
-#define NJ_MODE_CHORD_INSERT_SINGLE_CPP
+#if !defined(_MODE_CHORD_INSERT_SINGLE_CPP)
+#define _MODE_CHORD_INSERT_SINGLE_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
@@ -46,4 +46,4 @@ CUSTOM_DOC("Inserts whatever character was used to trigger this command, then re
     exec_command(app, nj_activate_previous_mode);
 }
 
-#endif // NJ_MODE_CHORD_INSERT_SINGLE_CPP
+#endif // _MODE_CHORD_INSERT_SINGLE_CPP

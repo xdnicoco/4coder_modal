@@ -8,8 +8,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_CHORD_CASE_CPP)
-#define NJ_MODE_CHORD_CASE_CPP
+#if !defined(_MODE_CHORD_CASE_CPP)
+#define _MODE_CHORD_CASE_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
@@ -128,4 +128,4 @@ CUSTOM_DOC("Selects the token or word under the cursor and converts all ascii te
     exec_command(app, nj_chord_case_camel);
 }
 
-#endif // NJ_MODE_CHORD_CASE_CPP
+#endif // _MODE_CHORD_CASE_CPP

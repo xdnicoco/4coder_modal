@@ -7,8 +7,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_INSERT_CPP)
-#define NJ_MODE_INSERT_CPP
+#if !defined(_MODE_INSERT_CPP)
+#define _MODE_INSERT_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
@@ -79,4 +79,4 @@ CUSTOM_DOC("Moves to the end of the current line, then activates insert mode."){
     NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE)
 }
 
-#endif // NJ_MODE_INSERT_CPP
+#endif // _MODE_INSERT_CPP

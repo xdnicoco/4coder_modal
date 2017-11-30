@@ -8,8 +8,8 @@ This custom extension provided "as is" without warranty of any kind,
  uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
-#if !defined(NJ_MODE_REPLACE_CPP)
-#define NJ_MODE_REPLACE_CPP
+#if !defined(_MODE_REPLACE_CPP)
+#define _MODE_REPLACE_CPP
 
 struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE)
 {
@@ -84,7 +84,7 @@ CUSTOM_DOC("Undoes the last two operation, then moves to the left. HACKIE AS HEL
 }
 
 static int32_t
-nj_replace_mode_delete(Application_Links *app, int32_t start, int32_t end, Buffer_Summary *buffer_out, uint32_t access){
+nj_replace_mode_delete(Application_Links *app, int32_t start, int32_t end, Buffer_Summary *buffer_out){
     Buffer_Summary buffer = {0};
     int32_t result = false;
     
@@ -107,7 +107,7 @@ nj_replace_mode_clipboard_cut(Application_Links *app, int32_t start, int32_t end
     int32_t result = false;
     
     if (clipboard_copy(app, start, end, &buffer, access)){
-        nj_replace_mode_delete(app, start, end, &buffer, access);
+        nj_replace_mode_delete(app, start, end, &buffer);
         if (buffer_out){*buffer_out = buffer;}
     }
     
@@ -123,7 +123,7 @@ CUSTOM_DOC("Replaces a single, whole token on or to the left of the cursor with 
     int32_t start = buffer_boundary_seek(app, &buffer, view.cursor.pos, 0, BoundaryToken | BoundaryWhitespace);
     int32_t end   = buffer_boundary_seek(app, &buffer, start,           1, BoundaryToken | BoundaryWhitespace);
     
-    nj_replace_mode_delete(app, start, end, 0, access);
+    nj_replace_mode_delete(app, start, end, 0);
 }
 
 CUSTOM_COMMAND_SIG(nj_replace_mode_cut_token_or_word)
@@ -152,7 +152,9 @@ CUSTOM_DOC("Copies the line under the cursor to clipboard, then replaces it with
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    nj_replace_mode_clipboard_cut(app, seek_line_beginning(app, &buffer, view.cursor.pos),seek_line_end(app, &buffer, view.cursor.pos) + 1, 0, access);
+    int32_t start = seek_line_beginning(app, &buffer, view.cursor.pos);
+    int32_t end = seek_line_end(app, &buffer, view.cursor.pos) + 1;
+    nj_replace_mode_clipboard_cut(app, start, end, 0, access);
 }
 
 CUSTOM_COMMAND_SIG(nj_replace_mode_paste)
@@ -238,4 +240,4 @@ CUSTOM_DOC("TODO"){
     }
 }
 
-#endif // NJ_MODE_REPLACE_CPP
+#endif // _MODE_REPLACE_CPP
