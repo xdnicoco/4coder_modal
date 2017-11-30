@@ -48,7 +48,6 @@ enum NJ_Mapid {
 #undef NJ_MODE_MAPID
 };
 
-
 #define NJ_MODE_MAPID_(mode) mapid_##mode
 #define NJ_MODE_MAPID(mode) NJ_MODE_MAPID_(mode)
 
@@ -96,7 +95,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_
 #define NJ_MODE_ACTIVATE_ENTER_FUNCTION(mode) NJ_MODE_ACTIVATE_ENTER_FUNCTION_(mode)
 
 #define STRINGIZE_TOKEN(token) #token
-#define NJ_INCLUDE_MODE_FILE_(mode) STRINGIZE_TOKEN(nj_mode_##mode.cpp)
+#define NJ_INCLUDE_MODE_FILE_(mode) STRINGIZE_TOKEN(mode_##mode.cpp)
 #define NJ_INCLUDE_MODE_FILE(mode)  NJ_INCLUDE_MODE_FILE_(mode)
 
 inline void nj_activate_mode_by_mapid(Application_Links *app, NJ_Mapid mapid);

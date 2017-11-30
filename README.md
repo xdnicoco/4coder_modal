@@ -16,8 +16,8 @@ Major modes:
 #define FCODER_DEFAULT_BINDINGS
 
 #include "4coder_default_include.cpp"
-#include "4coder_modal/nj_modal.cpp"
-#include "4coder_modal/nj_hooks.cpp"
+#include "4coder_modal/modal.cpp"
+#include "4coder_modal/modal_hooks.cpp"
 
 #if !defined(NO_BINDING)
 extern "C" int32_t
