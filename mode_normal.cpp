@@ -136,23 +136,23 @@ struct NJ_Macro_Register {
     bool32 initialized;
     NJ_Input_Node root;
 };
-NJ_Macro_Register nj_macro_registers[10] = {0};
+NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {0};
 
 //
 // HACK(NJ): Crahes when other command (like I-Search) tries to get user-input.
 //
 
 CUSTOM_COMMAND_SIG(nj_start_recording_keyboard_macro)
-CUSTOM_DOC("Starts to record a keyboard macro mode.") {
+CUSTOM_DOC("Starts to record a keyboard macro.") {
     Query_Bar query_bar = {0};
-    char query_bar_space[256];
+    char query_bar_space[1];
     query_bar.prompt = make_lit_string("Record to register: ");
     query_bar.string = make_fixed_width_string(query_bar_space);
     
-    if(query_user_number(app, &query_bar)) {
+    if(query_user_string(app, &query_bar)) {
         NJ_Input_Node *current_node = 0;
-        String current_register_string = query_bar.string;
-        int32_t current_register = str_to_int_s(current_register_string);
+        int32_t current_register = query_bar.string.str[0] - '!';
+        
         if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
             if(nj_macro_registers[current_register].initialized){
                 current_node = nj_macro_registers[current_register].root.n;
@@ -164,14 +164,13 @@ CUSTOM_DOC("Starts to record a keyboard macro mode.") {
                 
                 nj_macro_registers[current_register].initialized = false;
             }
-            
             end_query_bar(app, &query_bar, 0);
             
             Query_Bar info_bar = {0};
             char current_info_space[256] = {0};
             info_bar.prompt = make_fixed_width_string(current_info_space);
             append_ss(&info_bar.prompt, make_lit_string("Recording keyboard macro to register ["));
-            append_ss(&info_bar.prompt, current_register_string);
+            append_ss(&info_bar.prompt, query_bar.string);
             append_ss(&info_bar.prompt, make_lit_string("]"));
             start_query_bar(app, &info_bar, 0);
             
@@ -186,27 +185,30 @@ CUSTOM_DOC("Starts to record a keyboard macro mode.") {
                     print_message(app, msg, str_size(msg));
                 }
 #endif
-                if(!nj_macro_registers[current_register].initialized)
+                if(in.command.command)
                 {
-                    nj_macro_registers[current_register].initialized = true;
-                    nj_macro_registers[current_register].root.input = in;
-                    current_node = &nj_macro_registers[current_register].root;
+                    if(!nj_macro_registers[current_register].initialized)
+                    {
+                        nj_macro_registers[current_register].initialized = true;
+                        nj_macro_registers[current_register].root.input = in;
+                        current_node = &nj_macro_registers[current_register].root;
+                    }
+                    else {
+                        // TODO(NJ): Maybe a better way to allocate memory?
+                        current_node->n = (NJ_Input_Node *)memory_allocate(app, sizeof(NJ_Input_Node));
+                        current_node->n->n = 0;
+                        current_node->n->input = in;
+                        current_node = current_node->n;
+                    }
+                    
+                    in.command.command(app);
                 }
-                else {
-                    // TODO(NJ): Maybe a better way to allocate memory?
-                    current_node->n = (NJ_Input_Node *)memory_allocate(app, sizeof(NJ_Input_Node));
-                    current_node->n->n = 0;
-                    current_node->n->input = in;
-                    current_node = current_node->n;
-                }
-                
-                in.command.command(app);
             }
             end_query_bar(app, &info_bar, 0);
         }
         else {
             print_message(app, literal("Register ["));
-            print_message(app, current_register_string.str, current_register_string.size);
+            print_message(app, query_bar.string.str, query_bar.string.size);
             print_message(app, literal("] is invalid.\n"));
         }
         
@@ -214,7 +216,7 @@ CUSTOM_DOC("Starts to record a keyboard macro mode.") {
 }
 
 CUSTOM_COMMAND_SIG(nj_finish_recording_keyboard_macro)
-CUSTOM_DOC("Finishes to record a keyboard macro mode."){
+CUSTOM_DOC("Finishes to record a keyboard macro."){
     if(nj_recording_macro){
         nj_recording_macro = false;
     }
@@ -252,17 +254,17 @@ static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t
 }
 
 CUSTOM_COMMAND_SIG(nj_play_keyboard_macro)
-CUSTOM_DOC("Plays a keyboard macro mode from a given register.")
+CUSTOM_DOC("Querys for a macro register number and number of times to play it, then plays the macro the number of times queryed.")
 {
     if(!nj_recording_macro)
     {
         Query_Bar register_bar;
-        char register_bar_space[256];
+        char register_bar_space[1];
         register_bar.prompt = make_lit_string("Play macro from register: ");
         register_bar.string = make_fixed_width_string(register_bar_space);
         
-        if(query_user_number(app, &register_bar)) {
-            int32_t current_register = str_to_int_s(register_bar.string);
+        if(query_user_string(app, &register_bar)) {
+            int32_t current_register = register_bar.string.str[0] - '!';
             
             if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
                 Query_Bar times_bar;
