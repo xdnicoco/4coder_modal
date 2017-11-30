@@ -322,7 +322,7 @@ nj_keys(Bind_Helper *context){
     bind(context, '}', MDFR_CTRL, open_long_braces_break);
     
     bind(context, '/', MDFR_CTRL, nj_toggle_comment_line);
-    bind(context, '/', MDFR_ALT,  nj_if0_off);
+    bind(context, '/', MDFR_ALT,  if0_off);
     
     bind(context, key_f1,  MDFR_NONE, project_fkey_command);
     bind(context, key_f2,  MDFR_NONE, project_fkey_command);
