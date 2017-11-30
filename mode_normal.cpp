@@ -88,7 +88,8 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     
     bind(context, 'q', MDFR_NONE, nj_start_recording_keyboard_macro);
     bind(context, 'Q', MDFR_CTRL, nj_finish_recording_keyboard_macro);
-    bind(context, 'Q', MDFR_NONE, nj_play_keyboard_macro);
+    bind(context, '`', MDFR_NONE, nj_play_last_keyboard_macro);
+    bind(context, '~', MDFR_NONE, nj_play_keyboard_macro);
     
     bind(context, key_back, MDFR_SHIFT, nj_backspace_line);
     
@@ -102,7 +103,6 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, '!', MDFR_NONE, nj_execute_any_cli);
     bind(context, '!', MDFR_CTRL, execute_previous_cli);
     
-    bind(context, '~', MDFR_NONE, nj_execute_arbitrary_command);
     bind(context, ':', MDFR_NONE, nj_execute_arbitrary_command);
     bind(context, '.', MDFR_NONE, nj_toggler);
     
@@ -138,6 +138,8 @@ struct NJ_Macro_Register {
 };
 NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {0};
 
+int32_t nj_last_register = 0;
+
 //
 // HACK(NJ): Crahes when other command (like I-Search) tries to get user-input.
 //
@@ -154,6 +156,8 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
         int32_t current_register = query_bar.string.str[0] - '!';
         
         if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
+            nj_last_register = current_register;
+            
             if(nj_macro_registers[current_register].initialized){
                 current_node = nj_macro_registers[current_register].root.n;
                 while(current_node){
@@ -254,7 +258,7 @@ static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t
 }
 
 CUSTOM_COMMAND_SIG(nj_play_keyboard_macro)
-CUSTOM_DOC("Querys for a macro register number and number of times to play it, then plays the macro the number of times queryed.")
+CUSTOM_DOC("Querys for a macro register and number of times to play it, then plays the macro the number of times queryed.")
 {
     if(!nj_recording_macro)
     {
@@ -267,6 +271,8 @@ CUSTOM_DOC("Querys for a macro register number and number of times to play it, t
             int32_t current_register = register_bar.string.str[0] - '!';
             
             if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
+                nj_last_register = current_register;
+                
                 Query_Bar times_bar;
                 char times_bar_space[256];
                 times_bar.prompt = make_lit_string("How many times do you want to play the macro? ");
@@ -284,6 +290,15 @@ CUSTOM_DOC("Querys for a macro register number and number of times to play it, t
                 print_message(app, literal("] is invalid.\n"));
             }
         }
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_play_last_keyboard_macro)
+CUSTOM_DOC("Plays the last recorded or played macro.")
+{
+    if(!nj_recording_macro)
+    {
+        nj_play_keyboard_macro_from_register(app, nj_last_register);
     }
 }
 
