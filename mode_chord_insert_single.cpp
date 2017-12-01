@@ -1,6 +1,6 @@
 /*
 This mode inserts the next character pressed after activating it,
-then returns to the previous mode.
+ then returns to the previous mode.
 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,

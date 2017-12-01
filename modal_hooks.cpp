@@ -1,5 +1,4 @@
 /*
- nj 4coder custom hooks
 Here I setup 4coder so it will support the modal extension.
 
 WARNING:

@@ -1,10 +1,9 @@
 /*
- nj 4coder custom configuration
- This is the main file that binds all the modal functions.
+This is the main file that binds all the modal functions.
 This is an experimental way to use files in terms of modules and it is far from perfect,
-but that's how I do it.
+ but that's how I do it.
 Also, some of the bindings are specified here (that is bindings that are not for the keymap id
-of one of the modes).
+ of one of the modes).
 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
