@@ -279,10 +279,10 @@ CUSTOM_DOC("Querys for a macro register and number of times to play it, then pla
         register_bar.string = make_fixed_width_string(register_bar_space);
         
         if(query_user_string(app, &register_bar)) {
-            int32_t current_register = register_bar.string.str[0] - '!';
+            int32_t register_index = register_bar.string.str[0] - '!';
             
-            if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
-                nj_last_register = current_register;
+            if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
+                nj_last_register = register_index;
                 
                 Query_Bar times_bar;
                 char times_bar_space[256];
@@ -291,7 +291,7 @@ CUSTOM_DOC("Querys for a macro register and number of times to play it, then pla
                 if(query_user_number(app, &times_bar)) {
                     int32_t times = str_to_int_s(times_bar.string);
                     for(int32_t i = 0; i < times; ++i) {
-                        nj_play_keyboard_macro_from_register(app, current_register);
+                        nj_play_keyboard_macro_from_register(app, register_index);
                     }
                 }
             }
@@ -343,10 +343,56 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
         
         NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
         while(current_node){
-            char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
-            Assert(command_name); // NOTE(NJ): if we can't find the command inside the meta table, we are busted, that we are.
-            buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
-            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
+            if(current_node->input.command.command == write_character) {
+                uint8_t character[4];
+                uint32_t length = to_writable_character(current_node->input, character);
+                char length_str_space[4];
+                String length_str = make_string_cap(length_str_space, 0, 4);
+                int_to_str(&length_str, length);
+                
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("write_character_parameter(app, (uint8_t *)(\""));
+                if(char_is_whitespace(character[0])){
+                    switch(character[0]) {
+                        case '\n': {
+                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\n"));
+                        } break;
+                        case '\t': {
+                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\t"));
+                        } break;
+                        case '\v': {
+                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\v"));
+                        } break;
+                        case '\f': {
+                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\f"));
+                        } break;
+                        case '\r': {
+                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\r"));
+                        } break;
+                        case ' ': {
+                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(" "));
+                        } break;
+                    }
+                }
+                else if(character[0] == '"') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\\""));
+                }
+                else if(character[0] == '\\') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\"));
+                }
+                else {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, (char *)character, length);
+                }
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\"), "));
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, length_str.str, int_to_str_size(length));
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(");\n"));
+            }
+            else {
+                char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
+                Assert(command_name);
+                // NOTE(NJ): if we can't find the command inside the meta table, we are busted, that we are.
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
+            }
             
             current_node = current_node->n;
         }
@@ -361,18 +407,17 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
 }
 
 CUSTOM_COMMAND_SIG(nj_print_keyboard_macro)
-CUSTOM_DOC("Querys for a macro register and number of times to print it, then prints the macro the number of times queryed.")
-{
+CUSTOM_DOC("Querys for a macro register and number of times to print it, then prints the macro the number of times queryed."){
     Query_Bar register_bar;
     char register_bar_space[1];
     register_bar.prompt = make_lit_string("Print macro from register: ");
     register_bar.string = make_fixed_width_string(register_bar_space);
     
     if(query_user_string(app, &register_bar)) {
-        int32_t current_register = register_bar.string.str[0] - '!';
+        int32_t register_index = register_bar.string.str[0] - '!';
         
-        if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
-            nj_print_keyboard_macro_from_register(app, current_register);
+        if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
+            nj_print_keyboard_macro_from_register(app, register_index);
         }
         else {
             print_message(app, literal("Register ["));
