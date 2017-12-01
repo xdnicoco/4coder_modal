@@ -126,7 +126,6 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
-static bool32 nj_recording_macro = false;
 struct NJ_Input_Node {
     User_Input input;
     NJ_Input_Node *n;
@@ -150,7 +149,8 @@ static void nj_free_macro_register(Application_Links *app, int32_t current_regis
     nj_macro_registers[current_register].initialized = false;
 }
 
-static NJ_Input_Node *nj_push_input_node(Application_Links *app, User_Input in){
+// TODO(NJ): Maybe a better way to allocate memory?
+static NJ_Input_Node *nj_allocate_input_node(Application_Links *app, User_Input in){
     NJ_Input_Node *result = (NJ_Input_Node *)memory_allocate(app, sizeof(NJ_Input_Node));
     result->n = 0;
     result->input = in;
@@ -161,6 +161,7 @@ static NJ_Input_Node *nj_push_input_node(Application_Links *app, User_Input in){
 //
 // HACK(NJ): Tends to crash when other command (like I-Search) tries to get user-input.
 //
+static bool32 nj_recording_macro = false;
 
 CUSTOM_COMMAND_SIG(nj_start_recording_keyboard_macro)
 CUSTOM_DOC("Starts to record a keyboard macro.") {
@@ -213,8 +214,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                         current_node = &nj_macro_registers[current_register].root;
                     }
                     else {
-                        // TODO(NJ): Maybe a better way to allocate memory?
-                        current_node->n = nj_push_input_node(app, in);
+                        current_node->n = nj_allocate_input_node(app, in);
                         current_node = current_node->n;
                     }
                     
