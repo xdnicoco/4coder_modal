@@ -4,11 +4,15 @@ I took some elements from emacs, and some elements from vim, and added my own fu
 
 Tested only on 4coder 2.24.
 
-Major modes:
+### Major modes:
 * Normal  mode: Home mode for all the editing commands, the "home" that starts with 4coder.
 * Insert  mode: Text insertion mode, remaps all the keys to writing their respective characters.
 * Replace mode: Text replacement mode, replaces the text under the cursor. Mostly buggy.
-
+### Features at work:
+- [ ] Modal api
+- [ ] Keyboard macros
+- [ ] Snippets
+- [ ] And so on...
 # Installaion
 >**WARNING: This is my private custom layer, it is not supported by Allen nor by me, and it's purpose is to be educational and to serve as an example. Also, it is not compatible with OS X.**
 
