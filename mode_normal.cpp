@@ -121,6 +121,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, '6', MDFR_NONE, nj_increment_token_decimal);
     bind(context, '^', MDFR_NONE, nj_increment_digit_decimal);
     bind(context, '8', MDFR_NONE, nj_mode_enter_chord_settings);
+    
     end_map(context);
 }
 
@@ -337,9 +338,16 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
             buffer_replace_range(app, &buffer, 0, buffer.size, 0, 0);
         }
         
-        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("KEYBOARD_MACRO('"));
-        buffer_replace_range(app, &buffer, buffer.size, buffer.size, &register_char, 1);
-        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("') {\n"));
+        Partition *part = &global_part;
+        Temp_Memory temp = begin_temp_memory(part);
+        int32_t register_str_size = int_to_str_size(register_index);
+        char *register_str_space = push_array(part, char, register_str_size);
+        String register_str = make_string_cap(register_str_space, 0, register_str_size);
+        int_to_str(&register_str, register_index);
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("CUSTOM_COMMAND_SIG(nj_keyboard_macro_"));
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, register_str.str, register_str.size);
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(") {\n"));
+        end_temp_memory(temp);
         
         NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
         while(current_node){

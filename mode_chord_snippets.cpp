@@ -366,7 +366,7 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
         buffer_replace_range(app, &buffer, pos, pos + 2, 0, 0);
     }
     else {
-        write_string(app, make_lit_string("// "));
+        buffer_replace_range(app, &buffer, pos, pos, literal("// "));
     }
     move_down_textual(app);
 }
