@@ -4,7 +4,7 @@ This is an experimental way to use files in terms of modules and it is far from 
  but that's how I do it.
 Also, some of the bindings are specified here (that is bindings that are not for the keymap id
  of one of the modes).
-
+ 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
  either express or implied, including without limitation any implied warranties of condition,
@@ -18,6 +18,8 @@ This custom extension provided "as is" without warranty of any kind,
 // Key Bindings
 //
 
+#include "4coder_generated/command_metadata.h"
+
 static bool32 nj_theme_colors_inverted = false;
 
 static void nj_invert_colors(Theme_Color *colors, int32_t len){
@@ -26,7 +28,40 @@ static void nj_invert_colors(Theme_Color *colors, int32_t len){
     }
 }
 
-#include "4coder_generated/command_metadata.h"
+//
+// Utility functions
+//
+
+// TODO(NJ): Ask Allen if it is possible to add command_id to Generic_Command
+// HACK(NJ): O(n^2) very bad, that it is
+static Custom_Command_Function *nj_get_command_pointer_by_name(String name){
+    Custom_Command_Function *result = 0;
+    for(int32_t i = 0; i < command_one_past_last_id; ++i) {
+        if(match_sc(name, fcoder_metacmd_table[i].name))
+        {
+            result = fcoder_metacmd_table[i].proc;
+            break;
+        }
+    }
+    return(result);
+}
+
+static char *nj_get_command_name_by_pointer(Custom_Command_Function *command){
+    char *result = 0;
+    for(int32_t i = 0; i < command_one_past_last_id; ++i) {
+        if(command ==  fcoder_metacmd_table[i].proc)
+        {
+            result = fcoder_metacmd_table[i].name;
+            break;
+        }
+    }
+    return(result);
+}
+
+//
+//
+//
+
 #define NJ_MODES(modifier) \
 modifier(insert)\
 modifier(replace)\
@@ -53,17 +88,10 @@ enum NJ_Mapid {
 NJ_Mapid nj_previous_mapid;
 NJ_Mapid nj_current_mapid;
 
-#define NJ_MODE_STATE_(mode) nj_mode_state_##mode
-#define NJ_MODE_STATE(mode)  NJ_MODE_STATE_(mode)
-
-#define NJ_MODE_STATE_DECLERATION_(mode) NJ_Mode_State_##mode
-#define NJ_MODE_STATE_DECLERATION(mode)  NJ_MODE_STATE_DECLERATION_(mode)
-
 #define NJ_MODE_BIND_DECLERATION_(mode) inline void nj_bind_mode_keys_##mode(Bind_Helper *context)
 #define NJ_MODE_BIND_DECLERATION(mode)  NJ_MODE_BIND_DECLERATION_(mode)
 
 #define NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_bar_active, color_mode, color_mark, color_pop1, color_pop2)     \
-NJ_MODE_STATE_DECLERATION(mode) NJ_MODE_STATE(mode) = {};                                                                                               \
 static void mode_enter_##mode(struct Application_Links *app, int buffer_id){                                                                            \
     unsigned int access = AccessAll;                                                                                                                    \
     Buffer_Summary buffer;                                                                                                                              \
@@ -286,8 +314,7 @@ nj_keys(Bind_Helper *context){
     bind(context, 'T', MDFR_CTRL, list_all_locations);
     bind(context, 'v', MDFR_CTRL, paste_and_indent);
     bind(context, 'V', MDFR_CTRL, paste_next_and_indent);
-    bind(context, 'p', MDFR_CTRL, paste_and_indent);
-    bind(context, 'P', MDFR_CTRL, paste_next_and_indent);
+    bind(context, 'p', MDFR_CTRL, nj_mode_enter_chord_settings);
     bind(context, 'x', MDFR_CTRL, cut);
     bind(context, 'Z', MDFR_CTRL, redo);
     bind(context, 'z', MDFR_CTRL, undo);

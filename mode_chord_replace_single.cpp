@@ -11,8 +11,6 @@ This custom extension provided "as is" without warranty of any kind,
 #if !defined(_MODE_CHORD_REPLACE_SINGLE_CPP)
 #define _MODE_CHORD_REPLACE_SINGLE_CPP
 
-struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
-
 #define NJ_MODE_PRINT_ENTER_HOOK
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              0x050f15, // color_bg

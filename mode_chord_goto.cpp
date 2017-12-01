@@ -18,17 +18,18 @@ enum NJ_Chord_Goto_State_Mode {
     nj_chord_goto_mode_cancel,
 };
 
-struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE){
+struct NJ_Chord_Goto_State {
     int32_t line_input;
     Full_Cursor last_position;
     NJ_Chord_Goto_State_Mode goto_mode;
 };
+NJ_Chord_Goto_State nj_chord_goto_state = {0};
 
 #define NJ_MODE_PRINT_ENTER_HOOK \
 View_Summary view = get_active_view(app, AccessAll);\
-NJ_MODE_STATE(NJ_CURRENT_MODE).line_input = 0;\
-NJ_MODE_STATE(NJ_CURRENT_MODE).last_position = view.cursor;\
-NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_absolute;
+nj_chord_goto_state.line_input = 0;\
+nj_chord_goto_state.last_position = view.cursor;\
+nj_chord_goto_state.goto_mode = nj_chord_goto_mode_absolute;
 
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              0x051510, // color_bg
@@ -66,6 +67,10 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context,'-', MDFR_NONE, nj_chord_goto_set_mode_sub);
     bind(context,'=', MDFR_NONE, nj_chord_goto_set_mode_absolute);
     
+    bind(context,'p', MDFR_NONE, nj_chord_goto_set_mode_add);
+    bind(context,'m', MDFR_NONE, nj_chord_goto_set_mode_sub);
+    bind(context,'e', MDFR_NONE, nj_chord_goto_set_mode_absolute);
+    
     bind(context,'g', MDFR_NONE, nj_chord_goto_seek_beginning_of_file_then_prev);
     bind(context,'G', MDFR_NONE, nj_chord_goto_seek_end_of_file_then_prev);
     bind(context, key_back, MDFR_NONE, nj_chord_goto_backspace);
@@ -80,19 +85,19 @@ inline void nj_chord_goto_apply_seek(Application_Links *app){
     uint32_t line_number;
     View_Summary view = get_active_view(app, AccessProtected);
     
-    switch(NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode){
+    switch(nj_chord_goto_state.goto_mode){
         case nj_chord_goto_mode_absolute:{
-            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
+            line_number = nj_chord_goto_state.line_input;
         } break;
         case nj_chord_goto_mode_add:{
-            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.line + NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
+            line_number = nj_chord_goto_state.last_position.line + nj_chord_goto_state.line_input;
         } break;
         case nj_chord_goto_mode_sub:{
-            line_number = NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.line - NJ_MODE_STATE(NJ_CURRENT_MODE).line_input;
+            line_number = nj_chord_goto_state.last_position.line - nj_chord_goto_state.line_input;
         } break;
         default:
         case nj_chord_goto_mode_cancel:{
-            view_set_cursor(app, &view, seek_pos(NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.pos), true);
+            view_set_cursor(app, &view, seek_pos(nj_chord_goto_state.last_position.pos), true);
             return;
         } break;
     }
@@ -103,7 +108,7 @@ inline void nj_chord_goto_apply_seek(Application_Links *app){
     print_message(app, msg, str_size(msg));
 #endif
     
-    view_set_cursor(app, &view, seek_line_char(line_number, NJ_MODE_STATE(NJ_CURRENT_MODE).last_position.character), true);
+    view_set_cursor(app, &view, seek_line_char(line_number, nj_chord_goto_state.last_position.character), true);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_seek_end_of_file_then_prev)
@@ -132,38 +137,38 @@ CUSTOM_DOC("If the character used to trigger this command is numeric, adds it to
         sprintf(msg, "\ninput_digit  = %d\n",input_digit);
         print_message(app, msg, str_size(msg));
 #endif
-        NJ_MODE_STATE(NJ_CURRENT_MODE).line_input = NJ_MODE_STATE(NJ_CURRENT_MODE).line_input*10 + input_digit;
+        nj_chord_goto_state.line_input = nj_chord_goto_state.line_input*10 + input_digit;
         nj_chord_goto_apply_seek(app);
     }
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_set_mode_add)
 CUSTOM_DOC("Sets the goto chord mode to addition, then calculates the target line number."){
-    NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_add;
+    nj_chord_goto_state.goto_mode = nj_chord_goto_mode_add;
     nj_chord_goto_apply_seek(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_set_mode_sub)
 CUSTOM_DOC("Sets the goto chord mode to subtraction, then calculates the target line number."){
-    NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_sub;
+    nj_chord_goto_state.goto_mode = nj_chord_goto_mode_sub;
     nj_chord_goto_apply_seek(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_set_mode_absolute)
 CUSTOM_DOC("Sets the goto chord mode to absolute, then calculates the target line number."){
-    NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_absolute;
+    nj_chord_goto_state.goto_mode = nj_chord_goto_mode_absolute;
     nj_chord_goto_apply_seek(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_backspace)
 CUSTOM_DOC("Devides the goto line number input by 10, then calculates the target line number."){
-    NJ_MODE_STATE(NJ_CURRENT_MODE).line_input /= 10;
+    nj_chord_goto_state.line_input /= 10;
     nj_chord_goto_apply_seek(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_cancel)
 CUSTOM_DOC("Seek back to the line number before entering chord goto mode, then activate the previous mode."){
-    NJ_MODE_STATE(NJ_CURRENT_MODE).goto_mode = nj_chord_goto_mode_cancel;
+    nj_chord_goto_state.goto_mode = nj_chord_goto_mode_cancel;
     nj_chord_goto_apply_seek(app);
     nj_activate_previous_mode(app);
 }

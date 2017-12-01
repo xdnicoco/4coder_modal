@@ -1,7 +1,7 @@
 /*
 This mode inserts the next character pressed after activating it,
  then returns to the previous mode.
-
+ 
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
  either express or implied, including without limitation any implied warranties of condition,
@@ -10,8 +10,6 @@ This custom extension provided "as is" without warranty of any kind,
 
 #if !defined(_MODE_CHORD_INSERT_SINGLE_CPP)
 #define _MODE_CHORD_INSERT_SINGLE_CPP
-
-struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
 
 #define NJ_MODE_PRINT_ENTER_HOOK
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,

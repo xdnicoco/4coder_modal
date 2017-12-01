@@ -10,14 +10,7 @@ This custom extension provided "as is" without warranty of any kind,
 #if !defined(_MODE_CHORD_SETTINGS)
 #define _MODE_CHORD_SETTINGS
 
-struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {
-    bool32 colors_inverted;
-};
-
-
-#define NJ_MODE_PRINT_ENTER_HOOK \
-NJ_MODE_STATE(NJ_CURRENT_MODE).colors_inverted = false;
-
+#define NJ_MODE_PRINT_ENTER_HOOK
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              0x000000, // color_bg
                              0x000000, // color_bar
@@ -204,16 +197,11 @@ CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    // int32_t cursor_pos = view.cursor.pos;
-    // int32_t mark_pos = view.mark.pos;
-    
     close_panel(app);
     open_panel_hsplit(app);
     
     View_Summary new_view = get_active_view(app, access);
     view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
-    // view_set_cursor(app, &new_view, seek_pos(cursor_pos), 1);
-    // view_set_mark(app, &new_view, seek_pos(mark_pos));
     nj_activate_previous_mode(app);
 }
 
@@ -223,16 +211,11 @@ CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    // int32_t cursor_pos = view.cursor.pos;
-    // int32_t mark_pos   = view.mark.pos;
-    
     close_panel(app);
     open_panel_vsplit(app);
     
     View_Summary new_view = get_active_view(app, access);
     view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
-    // view_set_cursor(app, &new_view, seek_pos(cursor_pos), 1);
-    // view_set_mark(app, &new_view, seek_pos(mark_pos));
     nj_activate_previous_mode(app);
 }
 

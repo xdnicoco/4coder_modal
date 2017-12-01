@@ -11,8 +11,6 @@ This custom extension provided "as is" without warranty of any kind,
 #if !defined(_MODE_NORMAL_CPP)
 #define _MODE_NORMAL_CPP
 
-struct NJ_MODE_STATE_DECLERATION(NJ_CURRENT_MODE) {};
-
 #define NJ_MODE_PRINT_ENTER_HOOK
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
                              0x050f15, // color_bg
@@ -88,6 +86,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'q', MDFR_NONE, nj_start_recording_keyboard_macro);
     bind(context, '`', MDFR_NONE, nj_play_last_keyboard_macro);
     bind(context, '~', MDFR_NONE, nj_play_keyboard_macro);
+    bind(context, '~', MDFR_CTRL, nj_print_keyboard_macro);
     
     bind(context, key_back, MDFR_SHIFT, nj_backspace_line);
     
@@ -137,15 +136,15 @@ NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {0};
 
 int32_t nj_last_register = 0;
 
-static void nj_free_macro_register(Application_Links *app, int32_t current_register){
-    NJ_Input_Node *current_node = nj_macro_registers[current_register].root.n;
+static void nj_free_macro_register(Application_Links *app, int32_t register_index){
+    NJ_Input_Node *current_node = nj_macro_registers[register_index].root.n;
     while(current_node){
         NJ_Input_Node *temp = current_node->n;
         memory_free(app, current_node, sizeof(NJ_Input_Node));
         current_node = temp;
     }
     
-    nj_macro_registers[current_register].initialized = false;
+    nj_macro_registers[register_index].initialized = false;
 }
 
 // TODO(NJ): Maybe a better way to allocate memory?
@@ -237,10 +236,10 @@ CUSTOM_DOC("Finishes to record a keyboard macro."){
     }
 }
 
-static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t current_register){
-    Assert(current_register < ArrayCount(nj_macro_registers));
-    if(nj_macro_registers[current_register].initialized){
-        NJ_Input_Node *current_node = &nj_macro_registers[current_register].root;
+static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
+    Assert(register_index < ArrayCount(nj_macro_registers));
+    if(nj_macro_registers[register_index].initialized){
+        NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
         while(current_node){
             // HACK(NJ): Currently emulating write_character and nj_chord_goto_seek_line
             // TODO(NJ): Find a way to change the user input returned from get_command_input;
@@ -311,6 +310,75 @@ CUSTOM_DOC("Plays the last recorded or played macro.")
     if(!nj_recording_macro)
     {
         nj_play_keyboard_macro_from_register(app, nj_last_register);
+    }
+}
+
+static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
+    Assert(register_index < ArrayCount(nj_macro_registers));
+    if(nj_macro_registers[register_index].initialized){
+        char register_char = (char)(register_index + '!');
+        
+        char buffer_name_space[32];
+        String buffer_name = make_string_cap(buffer_name_space, 0, 32);
+        append_sc(&buffer_name, "*macro [");
+        append_s_char(&buffer_name, register_char);
+        append_sc(&buffer_name, "]*");
+        
+        Buffer_Summary buffer = get_buffer_by_name(app, buffer_name.str, buffer_name.size, AccessAll);
+        if(!buffer.exists){
+            buffer = create_buffer(app, buffer_name.str, buffer_name.size, BufferCreate_AlwaysNew);
+            buffer_set_setting(app, &buffer, BufferSetting_Unimportant, true);
+            buffer_set_setting(app, &buffer, BufferSetting_ReadOnly, true);
+            buffer_set_setting(app, &buffer, BufferSetting_VirtualWhitespace, true);
+            buffer_set_setting(app, &buffer, BufferSetting_WrapLine, false);
+        }
+        else{
+            buffer_send_end_signal(app, &buffer);
+            buffer_replace_range(app, &buffer, 0, buffer.size, 0, 0);
+        }
+        
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("KEYBOARD_MACRO('"));
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, &register_char, 1);
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("') {\n"));
+        
+        NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
+        while(current_node){
+            char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
+            Assert(command_name); // NOTE(NJ): if we can't find the command inside the meta table, we are busted, that we are.
+            buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
+            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
+            
+            current_node = current_node->n;
+        }
+        
+        buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("}\n"));
+        
+        View_Summary view = get_active_view(app, AccessAll);
+        view_set_buffer(app, &view, buffer.buffer_id, 0);
+        
+        lock_jump_buffer(buffer_name.str, buffer_name.size);
+    }
+}
+
+CUSTOM_COMMAND_SIG(nj_print_keyboard_macro)
+CUSTOM_DOC("Querys for a macro register and number of times to print it, then prints the macro the number of times queryed.")
+{
+    Query_Bar register_bar;
+    char register_bar_space[1];
+    register_bar.prompt = make_lit_string("Print macro from register: ");
+    register_bar.string = make_fixed_width_string(register_bar_space);
+    
+    if(query_user_string(app, &register_bar)) {
+        int32_t current_register = register_bar.string.str[0] - '!';
+        
+        if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
+            nj_print_keyboard_macro_from_register(app, current_register);
+        }
+        else {
+            print_message(app, literal("Register ["));
+            print_message(app, register_bar.string.str, register_bar.string.size);
+            print_message(app, literal("] is invalid.\n"));
+        }
     }
 }
 
@@ -424,21 +492,13 @@ CUSTOM_DOC("Execute a 'long form' command.")
         exit_4coder(app);
     }
     else{
-        bool32 command_sig_found = false;
         replace_char(&bar.string, ' ', '_');
-        for(int32_t i = 0;
-            i < command_one_past_last_id;
-            ++i)
-        {
-            if(match_sc(bar.string, fcoder_metacmd_table[i].name))
-            {
-                command_sig_found = true;
-                fcoder_metacmd_table[i].proc(app);
-                break;
-            }
+        
+        Custom_Command_Function *command = nj_get_command_pointer_by_name(bar.string);
+        if(command) {
+            command(app);
         }
-        if(!command_sig_found)
-        {
+        else {
             print_message(app, literal("unrecognized command: "));
             print_message(app, bar.string.str, bar.string.size);
             print_message(app, literal("\n"));
