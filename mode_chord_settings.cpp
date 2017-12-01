@@ -49,6 +49,11 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'v', MDFR_NONE, nj_chord_settings_toggle_virtual_whitespace_then_prev);
     bind(context, '?', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev);
     bind(context, 'q', MDFR_NONE, exit_4coder);
+    
+    bind(context, key_down,  MDFR_NONE, nj_move_panel_down_then_prev);
+    bind(context, key_right, MDFR_NONE, nj_move_panel_right_then_prev);
+    
+    bind(context, '\n',    MDFR_NONE, nj_mode_enter_normal);
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
     end_map(context);
 }
@@ -190,6 +195,44 @@ CUSTOM_COMMAND_SIG(nj_chord_settings_invert_colors_then_prev)
 CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
     nj_theme_colors_inverted = !nj_theme_colors_inverted;
     nj_set_modal_color_theme(app);
+    nj_activate_previous_mode(app);
+}
+
+CUSTOM_COMMAND_SIG(nj_move_panel_down_then_prev)
+CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    // int32_t cursor_pos = view.cursor.pos;
+    // int32_t mark_pos = view.mark.pos;
+    
+    close_panel(app);
+    open_panel_hsplit(app);
+    
+    View_Summary new_view = get_active_view(app, access);
+    view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
+    // view_set_cursor(app, &new_view, seek_pos(cursor_pos), 1);
+    // view_set_mark(app, &new_view, seek_pos(mark_pos));
+    nj_activate_previous_mode(app);
+}
+
+CUSTOM_COMMAND_SIG(nj_move_panel_right_then_prev)
+CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    
+    // int32_t cursor_pos = view.cursor.pos;
+    // int32_t mark_pos   = view.mark.pos;
+    
+    close_panel(app);
+    open_panel_vsplit(app);
+    
+    View_Summary new_view = get_active_view(app, access);
+    view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
+    // view_set_cursor(app, &new_view, seek_pos(cursor_pos), 1);
+    // view_set_mark(app, &new_view, seek_pos(mark_pos));
     nj_activate_previous_mode(app);
 }
 

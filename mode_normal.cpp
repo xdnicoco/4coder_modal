@@ -54,9 +54,8 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'C', MDFR_NONE, nj_copy_line);
     bind(context, 'c', MDFR_ALT,  nj_copy_token_or_word);
     bind(context, 'v', MDFR_NONE, paste);
-    bind(context, 'V', MDFR_NONE, paste_next_and_indent);
-    bind(context, 'p', MDFR_NONE, paste_and_indent);
-    bind(context, 'P', MDFR_NONE, paste_next_and_indent);
+    
+    bind(context, 'p', MDFR_NONE, nj_mode_enter_chord_settings);
     
     bind(context, 'g', MDFR_NONE, nj_mode_enter_chord_goto);
     bind(context, 'G', MDFR_NONE, nj_seek_end_of_file);
@@ -1027,7 +1026,6 @@ CUSTOM_DOC("Copies the line under the cursor."){
     
     copy(app);
 }
-
 
 CUSTOM_COMMAND_SIG(nj_cut_token_or_word)
 CUSTOM_DOC("Cuts a single, whole token on or to the left of the cursor."){
