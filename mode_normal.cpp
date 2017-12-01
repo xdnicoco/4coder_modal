@@ -139,8 +139,27 @@ NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {0};
 
 int32_t nj_last_register = 0;
 
+static void nj_free_macro_register(Application_Links *app, int32_t current_register){
+    NJ_Input_Node *current_node = nj_macro_registers[current_register].root.n;
+    while(current_node){
+        NJ_Input_Node *temp = current_node->n;
+        memory_free(app, current_node, sizeof(NJ_Input_Node));
+        current_node = temp;
+    }
+    
+    nj_macro_registers[current_register].initialized = false;
+}
+
+static NJ_Input_Node *nj_push_input_node(Application_Links *app, User_Input in){
+    NJ_Input_Node *result = (NJ_Input_Node *)memory_allocate(app, sizeof(NJ_Input_Node));
+    result->n = 0;
+    result->input = in;
+    
+    return(result);
+}
+
 //
-// HACK(NJ): Crahes when other command (like I-Search) tries to get user-input.
+// HACK(NJ): Tends to crash when other command (like I-Search) tries to get user-input.
 //
 
 CUSTOM_COMMAND_SIG(nj_start_recording_keyboard_macro)
@@ -158,14 +177,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
             nj_last_register = current_register;
             
             if(nj_macro_registers[current_register].initialized){
-                current_node = nj_macro_registers[current_register].root.n;
-                while(current_node){
-                    NJ_Input_Node *temp = current_node->n;
-                    memory_free(app, current_node, sizeof(NJ_Input_Node));
-                    current_node = temp;
-                }
-                
-                nj_macro_registers[current_register].initialized = false;
+                nj_free_macro_register(app, current_register);
             }
             end_query_bar(app, &query_bar, 0);
             
@@ -178,9 +190,9 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
             start_query_bar(app, &info_bar, 0);
             
             nj_recording_macro = true;
+            
             while(nj_recording_macro){
                 User_Input in = get_user_input(app, EventOnAnyKey, 0);
-                
 #if 0
                 { // NOTE(NJ): debugging data
                     char msg[256];
@@ -188,6 +200,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                     print_message(app, msg, str_size(msg));
                 }
 #endif
+                
                 if(in.command.command &&
                    (in.command.command != nj_start_recording_keyboard_macro) &&
                    (in.command.command != nj_play_keyboard_macro) &&
@@ -201,9 +214,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                     }
                     else {
                         // TODO(NJ): Maybe a better way to allocate memory?
-                        current_node->n = (NJ_Input_Node *)memory_allocate(app, sizeof(NJ_Input_Node));
-                        current_node->n->n = 0;
-                        current_node->n->input = in;
+                        current_node->n = nj_push_input_node(app, in);
                         current_node = current_node->n;
                     }
                     
@@ -217,7 +228,6 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
             print_message(app, query_bar.string.str, query_bar.string.size);
             print_message(app, literal("] is invalid.\n"));
         }
-        
     }
 }
 
@@ -229,6 +239,7 @@ CUSTOM_DOC("Finishes to record a keyboard macro."){
 }
 
 static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t current_register){
+    Assert(current_register < ArrayCount(nj_macro_registers));
     if(nj_macro_registers[current_register].initialized){
         NJ_Input_Node *current_node = &nj_macro_registers[current_register].root;
         while(current_node){
