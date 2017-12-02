@@ -125,6 +125,32 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
+
+
+/*
+ NOTE(NJ): The following section implements keyboard macros.
+Usage:
+- You can record a macro to a register represented by most of the ascii characters.
+- You can play a macro back either by register or calling the last recorded/played macro.
+- You can print the macro to a CUSTOM_COMMAND_SIG that you can later use in your own custom layer.
+
+HACK(NJ): TODO(NJ):
+- 4coder tends to crash when you try to nest commnads that use `get_user_input` -
+this means that (for example) you must not use I-Search while recording a macro.
+
+- If a command asks for user input using query-bars, you will need to re-enter the values every time you replay the macro. 
+This should be fixed when the query bars will support buffer opertaions, which is on Allen's todo list.
+
+- Does not fully support commands that use get_command_input, as it cannot be altered before calling the command.
+It means that it will always use the key that triggered playing the macro instead of the recorded input.
+  To bypass it I've emulated write_character (as it the most commonly used operation in a text editor),
+  but that's the only "get_command_input" command that is currently supported (menually).
+  
+- I didn't optimize any of this to work better with memory, and it allocates very frequently.
+
+NOTE(NJ): you can use nj_print_keyboard_macro to quickly create a custom command out of a keyboard macro for your own use.
+*/
+
 struct NJ_Input_Node {
     User_Input input;
     NJ_Input_Node *n;
@@ -157,11 +183,6 @@ static NJ_Input_Node *nj_allocate_input_node(Application_Links *app, User_Input 
     return(result);
 }
 
-//
-// HACK(NJ): Tends to crash when other command (like I-Search) tries to get user-input.
-//
-static bool32 nj_recording_macro = false;
-
 CUSTOM_COMMAND_SIG(nj_start_recording_keyboard_macro)
 CUSTOM_DOC("Starts to record a keyboard macro.") {
     Query_Bar query_bar = {0};
@@ -189,10 +210,8 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
             append_ss(&info_bar.prompt, make_lit_string("]"));
             start_query_bar(app, &info_bar, 0);
             
-            nj_recording_macro = true;
-            
-            while(nj_recording_macro){
-                User_Input in = get_user_input(app, EventOnAnyKey, 0);
+            User_Input in = {0};
+            while(in.command.command != nj_finish_recording_keyboard_macro){
 #if 0
                 { // NOTE(NJ): debugging data
                     char msg[256];
@@ -219,6 +238,8 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                     
                     in.command.command(app);
                 }
+                
+                in = get_user_input(app, EventOnAnyKey, 0);
             }
             end_query_bar(app, &info_bar, 0);
         }
@@ -232,9 +253,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
 
 CUSTOM_COMMAND_SIG(nj_finish_recording_keyboard_macro)
 CUSTOM_DOC("Finishes to record a keyboard macro."){
-    if(nj_recording_macro){
-        nj_recording_macro = false;
-    }
+    // NOTE(NJ): This is a stub, only so I could bind finishing a macro to a keymap
 }
 
 static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
@@ -272,35 +291,32 @@ static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t
 CUSTOM_COMMAND_SIG(nj_play_keyboard_macro)
 CUSTOM_DOC("Querys for a macro register and number of times to play it, then plays the macro the number of times queryed.")
 {
-    if(!nj_recording_macro)
-    {
-        Query_Bar register_bar;
-        char register_bar_space[1];
-        register_bar.prompt = make_lit_string("Play macro from register: ");
-        register_bar.string = make_fixed_width_string(register_bar_space);
+    Query_Bar register_bar;
+    char register_bar_space[1];
+    register_bar.prompt = make_lit_string("Play macro from register: ");
+    register_bar.string = make_fixed_width_string(register_bar_space);
+    
+    if(query_user_string(app, &register_bar)) {
+        int32_t register_index = register_bar.string.str[0] - '!';
         
-        if(query_user_string(app, &register_bar)) {
-            int32_t register_index = register_bar.string.str[0] - '!';
+        if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
+            nj_last_register = register_index;
             
-            if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
-                nj_last_register = register_index;
-                
-                Query_Bar times_bar;
-                char times_bar_space[256];
-                times_bar.prompt = make_lit_string("How many times do you want to play the macro? ");
-                times_bar.string = make_fixed_width_string(times_bar_space);
-                if(query_user_number(app, &times_bar)) {
-                    int32_t times = str_to_int_s(times_bar.string);
-                    for(int32_t i = 0; i < times; ++i) {
-                        nj_play_keyboard_macro_from_register(app, register_index);
-                    }
+            Query_Bar times_bar;
+            char times_bar_space[256];
+            times_bar.prompt = make_lit_string("How many times do you want to play the macro? ");
+            times_bar.string = make_fixed_width_string(times_bar_space);
+            if(query_user_number(app, &times_bar)) {
+                int32_t times = str_to_int_s(times_bar.string);
+                for(int32_t i = 0; i < times; ++i) {
+                    nj_play_keyboard_macro_from_register(app, register_index);
                 }
             }
-            else {
-                print_message(app, literal("Register ["));
-                print_message(app, register_bar.string.str, register_bar.string.size);
-                print_message(app, literal("] is invalid.\n"));
-            }
+        }
+        else {
+            print_message(app, literal("Register ["));
+            print_message(app, register_bar.string.str, register_bar.string.size);
+            print_message(app, literal("] is invalid.\n"));
         }
     }
 }
@@ -308,10 +324,7 @@ CUSTOM_DOC("Querys for a macro register and number of times to play it, then pla
 CUSTOM_COMMAND_SIG(nj_play_last_keyboard_macro)
 CUSTOM_DOC("Plays the last recorded or played macro.")
 {
-    if(!nj_recording_macro)
-    {
-        nj_play_keyboard_macro_from_register(app, nj_last_register);
-    }
+    nj_play_keyboard_macro_from_register(app, nj_last_register);
 }
 
 static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
@@ -351,6 +364,7 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
         
         NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
         while(current_node){
+            // TODO(NJ): find a way to not emulate functions as the following:
             if(current_node->input.command.command == write_character) {
                 uint8_t character[4];
                 uint32_t length = to_writable_character(current_node->input, character);
@@ -396,8 +410,8 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
             }
             else {
                 char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
-                Assert(command_name);
                 // NOTE(NJ): if we can't find the command inside the meta table, we are busted, that we are.
+                Assert(command_name);
                 buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
                 buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
             }
@@ -434,6 +448,10 @@ CUSTOM_DOC("Querys for a macro register and number of times to print it, then pr
         }
     }
 }
+
+//
+// End of keyboard macros
+//
 
 static void nj_execute_a_cli_command(Application_Links *app, String cmd, String output_buffer_name)
 {
