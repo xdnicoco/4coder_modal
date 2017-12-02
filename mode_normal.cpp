@@ -138,7 +138,7 @@ HACK(NJ): TODO(NJ):
 - 4coder tends to crash when you try to nest commnads that use `get_user_input` -
 this means that (for example) you must not use I-Search while recording a macro.
 
-- If a command asks for user input using query-bars, you will need to re-enter the values every time you replay the macro. 
+- If a command asks for user input using query-bars, you will need to re-enter the values every time you replay the macro.
 This should be fixed when the query bars will support buffer opertaions, which is on Allen's todo list.
 
 - Does not fully support commands that use get_command_input, as it cannot be altered before calling the command.
@@ -147,8 +147,6 @@ It means that it will always use the key that triggered playing the macro instea
   but that's the only "get_command_input" command that is currently supported (menually).
   
 - I didn't optimize any of this to work better with memory, and it allocates very frequently.
-
-NOTE(NJ): you can use nj_print_keyboard_macro to quickly create a custom command out of a keyboard macro for your own use.
 */
 
 struct NJ_Input_Node {
