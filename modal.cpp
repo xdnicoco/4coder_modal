@@ -258,11 +258,11 @@ nj_keys(Bind_Helper *context){
     
     bind(context, key_up,   MDFR_CTRL, seek_whitespace_up_end_line);
     bind(context, key_up,   MDFR_ALT,  move_up_10);
-    bind(context, key_up,   MDFR_SHRL, move_line_up);
+    bind(context, key_up,   MDFR_CTLT, move_line_up);
     
     bind(context, key_down, MDFR_CTRL, seek_whitespace_down_end_line);
     bind(context, key_down, MDFR_ALT,  move_down_10);
-    bind(context, key_down, MDFR_SHRL, move_line_down);
+    bind(context, key_down, MDFR_CTLT, move_line_down);
     
     bind(context, key_right, MDFR_CTRL, seek_alphanumeric_or_camel_right);
     bind(context, key_right, MDFR_ALT,  seek_whitespace_right);
