@@ -80,7 +80,7 @@ START_HOOK_SIG(nj_start){
 }
 
 OPEN_FILE_HOOK_SIG(nj_new_file){
-    int32_t access = AccessAll;
+    int32_t access = AccessOpen;
     Buffer_Summary buffer = get_buffer(app, buffer_id, access);
     String ext = file_extension(make_string(buffer.file_name, buffer.file_name_len));
     View_Summary view = get_active_view(app, access);
@@ -92,24 +92,6 @@ OPEN_FILE_HOOK_SIG(nj_new_file){
     return(0);
 }
 
-OPEN_FILE_HOOK_SIG(nj_file_save){
-    Buffer_Summary buffer = get_buffer(app, buffer_id, AccessAll);
-    Assert(buffer.exists);
-    
-#if defined(FCODER_AUTO_INDENT_CPP)
-    int32_t is_virtual = 0;
-    if (automatically_indent_text_on_save && buffer_get_setting(app, &buffer, BufferSetting_VirtualWhitespace, &is_virtual)){
-        if (is_virtual){
-            auto_tab_whole_file_by_summary(app, &buffer);
-        }
-    }
-#endif
-    clean_all_lines(app);
-    
-    // no meaning for return
-    return(0);
-}
-
 static void
 nj_set_default_hooks(Bind_Helper *context){
     set_hook(context, hook_exit, default_exit);
@@ -118,7 +100,7 @@ nj_set_default_hooks(Bind_Helper *context){
     set_start_hook(context, nj_start);
     set_open_file_hook(context, default_file_settings);
     set_new_file_hook(context, nj_new_file);
-    set_save_file_hook(context, nj_file_save);
+    set_save_file_hook(context, default_file_save);
     
 #if defined(FCODER_STICKY_JUMP)
     set_end_file_hook(context, end_file_close_jump_list);
