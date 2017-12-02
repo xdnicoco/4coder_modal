@@ -2,7 +2,7 @@
 This is my EXPEREMENTAL(!!) customization layer of 4coder super in the journey to a modal future.
 I took some elements from emacs, and some elements from vim, and added my own functions and functionality to create a highly customized modal system. Every mode has custom colors to indicate it is activated.
 
-Tested only on 4coder 2.24.
+Tested only on 4coder 4.0.25.
 
 ### Major modes:
 * Normal  mode: Home mode for all the editing commands, the "home" that starts with 4coder.
