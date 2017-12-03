@@ -162,7 +162,7 @@ NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {};
 int32_t nj_last_register = 0;
 
 static void nj_free_macro_register(Application_Links *app, int32_t register_index){
-    NJ_Input_Node *current_node = nj_macro_registers[register_index].root->n;
+    NJ_Input_Node *current_node = nj_macro_registers[register_index].root;
     while(current_node){
         NJ_Input_Node *temp = current_node->n;
         memory_free(app, current_node, sizeof(NJ_Input_Node));
