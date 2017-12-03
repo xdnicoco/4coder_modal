@@ -14,8 +14,9 @@ This custom extension provided "as is" without warranty of any kind,
 
 #if !defined(_MODAL_CPP)
 #define _MODAL_CPP
+
 //
-// Key Bindings
+// Utility functions
 //
 
 #include "4coder_generated/command_metadata.h"
@@ -28,17 +29,12 @@ static void nj_invert_colors(Theme_Color *colors, int32_t len){
     }
 }
 
-//
-// Utility functions
-//
-
 // TODO(NJ): Ask Allen if it is possible to add command_id to Generic_Command
 // HACK(NJ): O(n^2) very bad, that it is
 static Custom_Command_Function *nj_get_command_pointer_by_name(String name){
     Custom_Command_Function *result = 0;
     for(int32_t i = 0; i < command_one_past_last_id; ++i) {
-        if(match_sc(name, fcoder_metacmd_table[i].name))
-        {
+        if(match_sc(name, fcoder_metacmd_table[i].name)) {
             result = fcoder_metacmd_table[i].proc;
             break;
         }
@@ -49,8 +45,7 @@ static Custom_Command_Function *nj_get_command_pointer_by_name(String name){
 static char *nj_get_command_name_by_pointer(Custom_Command_Function *command){
     char *result = 0;
     for(int32_t i = 0; i < command_one_past_last_id; ++i) {
-        if(command ==  fcoder_metacmd_table[i].proc)
-        {
+        if(command == fcoder_metacmd_table[i].proc) {
             result = fcoder_metacmd_table[i].name;
             break;
         }
@@ -59,7 +54,7 @@ static char *nj_get_command_name_by_pointer(Custom_Command_Function *command){
 }
 
 //
-//
+// Modes
 //
 
 #define NJ_MODES(modifier) \
@@ -202,6 +197,9 @@ inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
     }
 }
 
+//
+// Key Bindings
+//
 
 #define MDFR_CTLT MDFR_CTRL  | MDFR_ALT
 #define MDFR_SHRL MDFR_SHIFT | MDFR_CTRL
@@ -269,7 +267,7 @@ nj_keys(Bind_Helper *context){
     
     bind(context, key_back, MDFR_CTRL, nj_backspace_word);
     bind(context, key_del,  MDFR_CTRL, delete_word);
-    bind(context, key_back, MDFR_ALT, snipe_token_or_word);
+    bind(context, key_back, MDFR_ALT,  snipe_token_or_word);
     
     bind(context, '\t', MDFR_NONE,  word_complete);
     
