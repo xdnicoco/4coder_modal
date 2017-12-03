@@ -154,22 +154,22 @@ struct NJ_Input_Node {
     NJ_Input_Node *n;
 };
 struct NJ_Macro_Register {
-    bool32 initialized;
-    NJ_Input_Node root;
+    NJ_Input_Node *root;
+    NJ_Mapid initial_mode;
 };
-NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {0};
+NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {};
 
 int32_t nj_last_register = 0;
 
 static void nj_free_macro_register(Application_Links *app, int32_t register_index){
-    NJ_Input_Node *current_node = nj_macro_registers[register_index].root.n;
+    NJ_Input_Node *current_node = nj_macro_registers[register_index].root->n;
     while(current_node){
         NJ_Input_Node *temp = current_node->n;
         memory_free(app, current_node, sizeof(NJ_Input_Node));
         current_node = temp;
     }
     
-    nj_macro_registers[register_index].initialized = false;
+    nj_macro_registers[register_index] = {0};
 }
 
 // TODO(NJ): Maybe a better way to allocate memory?
@@ -195,7 +195,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
         if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
             nj_last_register = current_register;
             
-            if(nj_macro_registers[current_register].initialized){
+            if(nj_macro_registers[current_register].root){
                 nj_free_macro_register(app, current_register);
             }
             end_query_bar(app, &query_bar, 0);
@@ -223,11 +223,11 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                    (in.command.command != nj_play_keyboard_macro) &&
                    (in.command.command != nj_play_last_keyboard_macro))
                 {
-                    if(!nj_macro_registers[current_register].initialized)
+                    if(!nj_macro_registers[current_register].root)
                     {
-                        nj_macro_registers[current_register].initialized = true;
-                        nj_macro_registers[current_register].root.input = in;
-                        current_node = &nj_macro_registers[current_register].root;
+                        nj_macro_registers[current_register].initial_mode = nj_current_mapid;
+                        nj_macro_registers[current_register].root = nj_allocate_input_node(app, in);
+                        current_node = nj_macro_registers[current_register].root;
                     }
                     else {
                         current_node->n = nj_allocate_input_node(app, in);
@@ -256,8 +256,8 @@ CUSTOM_DOC("Finishes to record a keyboard macro."){
 
 static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
     Assert(register_index < ArrayCount(nj_macro_registers));
-    if(nj_macro_registers[register_index].initialized){
-        NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
+    if(nj_macro_registers[register_index].root){
+        NJ_Input_Node *current_node = nj_macro_registers[register_index].root;
         while(current_node){
             // HACK(NJ): Currently emulating write_character and nj_chord_goto_seek_line
             // TODO(NJ): Find a way to change the user input returned from get_command_input;
@@ -283,6 +283,9 @@ static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t
             }
             current_node = current_node->n;
         }
+        // NOTE(NJ): We always want to return to the initial mode after finishing the playback
+        // so we can have repeatativity.
+        nj_activate_mode_by_mapid(app, nj_macro_registers[register_index].initial_mode);
     }
 }
 
@@ -327,7 +330,7 @@ CUSTOM_DOC("Plays the last recorded or played macro.")
 
 static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
     Assert(register_index < ArrayCount(nj_macro_registers));
-    if(nj_macro_registers[register_index].initialized){
+    if(nj_macro_registers[register_index].root){
         char register_char = (char)(register_index + '!');
         
         char buffer_name_space[32];
@@ -360,7 +363,7 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
         buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(") {\n"));
         end_temp_memory(temp);
         
-        NJ_Input_Node *current_node = &nj_macro_registers[register_index].root;
+        NJ_Input_Node *current_node = nj_macro_registers[register_index].root;
         while(current_node){
             // TODO(NJ): find a way to not emulate functions as the following:
             if(current_node->input.command.command == write_character) {
