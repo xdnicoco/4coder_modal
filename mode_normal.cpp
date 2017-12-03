@@ -411,10 +411,13 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
             }
             else {
                 char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
-                // NOTE(NJ): if we can't find the command inside the meta table, we are busted, that we are.
-                Assert(command_name);
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
+                if(command_name) {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
+                }
+                else {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\n//\n// WARNING: Unkown command in this position in the macro.\n// Add CUSTOM_DOC to commands to enable printing them as a part of a macro.\n//\n\n"));
+                }
             }
             
             current_node = current_node->n;
@@ -494,8 +497,7 @@ CUSTOM_DOC("Queries for a system command, runs the system command as a CLI and p
 }
 
 CUSTOM_COMMAND_SIG(nj_execute_arbitrary_command)
-CUSTOM_DOC("Execute a 'long form' command.")
-{
+CUSTOM_DOC("Execute a 'long form' command.") {
     // NOTE(allen): This isn't a super powerful version of this command, I will expand
     // upon it so that it has all the cmdid_* commands by default.  However, with this
     // as an example you have everything you need to make it work already. You could
