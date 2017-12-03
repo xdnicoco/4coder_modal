@@ -12,7 +12,7 @@ This custom extension provided "as is" without warranty of any kind,
 
 
 enum NJ_Chord_Goto_State_Mode {
-    nj_chord_goto_mode_absolute = 0,
+    nj_chord_goto_mode_absolute,
     nj_chord_goto_mode_add,
     nj_chord_goto_mode_sub,
     nj_chord_goto_mode_cancel,
