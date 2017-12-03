@@ -38,6 +38,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'f', MDFR_NONE, nj_chord_settings_toggle_fullscreen_then_prev);
     bind(context, 'l', MDFR_NONE, nj_chord_settings_toggle_line_wrap_then_prev);
     bind(context, 'i', MDFR_NONE, nj_chord_settings_invert_colors_then_prev);
+    bind(context, 'I', MDFR_NONE, nj_chord_settings_toggle_buffer_importance_then_prev);
     bind(context, 't', MDFR_NONE, nj_chord_settings_open_color_tweaker_then_prev);
     bind(context, 'v', MDFR_NONE, nj_chord_settings_toggle_virtual_whitespace_then_prev);
     bind(context, '?', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev);
@@ -216,6 +217,17 @@ CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
     
     View_Summary new_view = get_active_view(app, access);
     view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
+    nj_activate_previous_mode(app);
+}
+
+CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_buffer_importance_then_prev)
+CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
+    int32_t buffer_is_unimportant;
+    buffer_get_setting(app, &buffer, BufferSetting_Unimportant, &buffer_is_unimportant);
+    buffer_set_setting(app, &buffer, BufferSetting_Unimportant, !buffer_is_unimportant);
     nj_activate_previous_mode(app);
 }
 
