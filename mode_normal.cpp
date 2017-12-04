@@ -132,7 +132,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
 Usage:
 - You can record a macro to a register represented by most of the ascii characters.
 - You can play a macro back either by register or calling the last recorded/played macro.
-- You can print the macro to a CUSTOM_COMMAND_SIG that you can later use in your own custom layer.
+- You can print the macro to a CUSTOM_COMMAND_SIG that you can later use in your own custom
 
 HACK(NJ): TODO(NJ):
 - 4coder tends to crash when you try to nest commnads that use `get_user_input` -
@@ -155,6 +155,7 @@ struct NJ_Input_Node {
 };
 struct NJ_Macro_Register {
     NJ_Input_Node *root;
+    int32_t input_count;
     NJ_Mapid initial_mode;
 };
 NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {};
@@ -190,13 +191,14 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
     
     if(query_user_string(app, &query_bar)) {
         NJ_Input_Node *current_node = 0;
-        int32_t current_register = query_bar.string.str[0] - '!';
+        int32_t register_index = query_bar.string.str[0] - '!';
         
-        if(current_register < ArrayCount(nj_macro_registers) && current_register >= 0){
-            nj_last_register = current_register;
+        if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
+            nj_last_register = register_index;
+            NJ_Macro_Register *recording_register = nj_macro_registers + register_index;
             
-            if(nj_macro_registers[current_register].root){
-                nj_free_macro_register(app, current_register);
+            if(recording_register->root){
+                nj_free_macro_register(app, register_index);
             }
             end_query_bar(app, &query_bar, 0);
             
@@ -223,13 +225,15 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                    (in.command.command != nj_play_keyboard_macro) &&
                    (in.command.command != nj_play_last_keyboard_macro))
                 {
-                    if(!nj_macro_registers[current_register].root)
+                    if(!recording_register->root)
                     {
-                        nj_macro_registers[current_register].initial_mode = nj_current_mapid;
-                        nj_macro_registers[current_register].root = nj_allocate_input_node(app, in);
-                        current_node = nj_macro_registers[current_register].root;
+                        recording_register->initial_mode = nj_current_mapid;
+                        recording_register->root = nj_allocate_input_node(app, in);
+                        current_node = recording_register->root;
+                        recording_register->input_count = 0;
                     }
                     else {
+                        ++recording_register->input_count;
                         current_node->n = nj_allocate_input_node(app, in);
                         current_node = current_node->n;
                     }
@@ -374,27 +378,23 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
                 int_to_str(&length_str, length);
                 
                 buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("write_character_parameter(app, (uint8_t *)(\""));
-                if(char_is_whitespace(character[0])){
-                    switch(character[0]) {
-                        case '\n': {
-                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\n"));
-                        } break;
-                        case '\t': {
-                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\t"));
-                        } break;
-                        case '\v': {
-                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\v"));
-                        } break;
-                        case '\f': {
-                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\f"));
-                        } break;
-                        case '\r': {
-                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\r"));
-                        } break;
-                        case ' ': {
-                            buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(" "));
-                        } break;
-                    }
+                if(character[0] == '\n') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\n"));
+                }
+                else if(character[0] == '\t') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\t"));
+                }
+                else if(character[0] == '\v') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\v"));
+                }
+                else if(character[0] == '\f') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\f"));
+                }
+                else if(character[0] == '\r') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\r"));
+                }
+                else if(character[0] == ' ') {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(" "));
                 }
                 else if(character[0] == '"') {
                     buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\\""));
@@ -452,6 +452,79 @@ CUSTOM_DOC("Querys for a macro register and number of times to print it, then pr
         }
     }
 }
+
+#if 0
+CUSTOM_COMMAND_SIG(nj_show_register)
+CUSTOM_DOC("Querys for a macro register and number of times to show it, then shows the macro the number of times queryed."){
+    Query_Bar register_bar;
+    char register_bar_space[1];
+    register_bar.prompt = make_lit_string("Show macro from register: ");
+    register_bar.string = make_fixed_width_string(register_bar_space);
+    
+    if(query_user_string(app, &register_bar)) {
+        int32_t register_index = register_bar.string.str[0] - '!';
+        
+        if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
+            NJ_Macro_Register *playing_register = nj_macro_registers + register_index;
+            Partition *part = &global_part;
+            Temp_Memory temp = begin_temp_memory(part);
+            NJ_Input_Node *current_node = playing_register->root;
+            
+            int32_t show_str_size = playing_register->input_count*6 + 16;
+            char *show_str_space = push_array(part, char, sizeof(char)*show_str_size);
+            String show_str = make_string_cap(show_str_space, 0, show_str_size);
+            append_s_char(&show_str, '[');
+            append_ss(&show_str, register_bar.string);
+            append_sc(&show_str, "]: ");
+            
+            while(current_node){
+                append_s_char(&show_str, '<');
+                uint8_t character[4];
+                uint32_t length = to_writable_character(current_node->input, character);
+                char length_str_space[4];
+                
+                if(character[0] == '\n') {
+                    append_sc(&show_str, "\\n");
+                }
+                else if(character[0] == '\t') {
+                    append_sc(&show_str, "\\t");
+                }
+                else if(character[0] == '\v') {
+                    append_sc(&show_str, "\\v");
+                }
+                else if(character[0] == '\f') {
+                    append_sc(&show_str, "\\f");
+                }
+                else if(character[0] == '\r') {
+                    append_sc(&show_str, "\\r");
+                }
+                else if(character[0] == ' ') {
+                    append_sc(&show_str, " ");
+                }
+                else if(character[0] == '"') {
+                    append_sc(&show_str, "\\\"");
+                }
+                else if(character[0] == '\\') {
+                    append_sc(&show_str, "\\");
+                }
+                else {
+                    append_ss(&show_str, make_string(character, length));
+                }
+                append_s_char(&show_str, '>');
+                
+                current_node = current_node->n;
+            }
+            print_message(app, show_str.str, show_str.size);
+            end_temp_memory(temp);
+        }
+        else {
+            print_message(app, literal("Register ["));
+            print_message(app, register_bar.string.str, register_bar.string.size);
+            print_message(app, literal("] is empty or invalid.\n"));
+        }
+    }
+}
+#endif
 
 //
 // End of keyboard macros
