@@ -42,6 +42,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'b', MDFR_NONE, nj_chord_snippet_long_braces_break_then_insert);
     bind(context, '}', MDFR_NONE, nj_chord_snippet_long_braces_break_then_insert);
     bind(context, 'c', MDFR_NONE, nj_chord_snippet_case_then_insert);
+    bind(context, 'd', MDFR_NONE, nj_write_date_then_prev);
     bind(context, 'i', MDFR_NONE, nj_chord_snippet_if_then_insert);
     bind(context, 'e', MDFR_NONE, nj_chord_snippet_else_then_insert);
     bind(context, 'E', MDFR_NONE, nj_chord_snippet_else_if_then_insert);
@@ -434,6 +435,23 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
 CUSTOM_COMMAND_SIG(nj_include_gaurd_file_then_prev)
 CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the current buffer file name, then return to the previous mode."){
     nj_include_gaurd_file(app);
+    nj_activate_previous_mode(app);
+}
+
+#include <time.h>
+CUSTOM_COMMAND_SIG(nj_write_date_then_prev)
+CUSTOM_DOC("Insert the date under the cursor, then return to the previous mode."){
+    time_t rawtime;
+    struct tm * timeinfo;
+    
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+    
+    char date_string_space[64];
+    strftime(date_string_space, 64, "%B %d, %Y", timeinfo);
+    
+    String date_string = make_string(date_string_space, str_size(date_string_space));
+    write_string(app, date_string);
     nj_activate_previous_mode(app);
 }
 
