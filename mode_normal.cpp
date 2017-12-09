@@ -52,6 +52,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'C', MDFR_NONE, nj_copy_line);
     bind(context, 'c', MDFR_ALT,  nj_copy_token_or_word);
     bind(context, 'v', MDFR_NONE, paste);
+    bind(context, 'V', MDFR_NONE, paste_next_and_indent);
     
     bind(context, 'p', MDFR_NONE, nj_mode_enter_chord_settings);
     
