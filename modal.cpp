@@ -113,8 +113,8 @@ static void mode_enter_##mode(struct Application_Links *app, int buffer_id){    
 #define NJ_MODE_PRINT_ENTER_FUNCTION(mode, color_bg, color_bar, color_bar_hover, color_bar_active, color_mode, color_mark, color_pop1, color_pop2)      \
 NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_bar_active, color_mode, color_mark, color_pop1, color_pop2)
 
-#define NJ_MODE_ACTIVATE_ENTER_FUNCTION_(mode) mode_enter_##mode(app, get_active_view(app, AccessAll).buffer_id);
-#define NJ_MODE_ACTIVATE_ENTER_FUNCTION(mode) NJ_MODE_ACTIVATE_ENTER_FUNCTION_(mode)
+#define NJ_ENTER_MODE_(mode) mode_enter_##mode(app, get_active_view(app, AccessAll).buffer_id);
+#define NJ_ENTER_MODE(mode) NJ_ENTER_MODE_(mode)
 
 #define STRINGIZE_TOKEN(token) #token
 #define NJ_INCLUDE_MODE_FILE_(mode) STRINGIZE_TOKEN(mode_##mode.cpp)
@@ -179,7 +179,7 @@ static Named_Mapping nj_named_maps_values[] = {
 inline void nj_activate_mode_by_mapid(Application_Links *app, NJ_Mapid mapid){
     switch(mapid)
     {
-#define NJ_GEN_MAPID_MODE_PAIR(mode) case mapid_##mode: {NJ_MODE_ACTIVATE_ENTER_FUNCTION(mode);}break;
+#define NJ_GEN_MAPID_MODE_PAIR(mode) case mapid_##mode: {NJ_ENTER_MODE(mode);}break;
         default:
         NJ_GEN_MAPID_MODE_PAIR(normal)
             NJ_MODES(NJ_GEN_MAPID_MODE_PAIR)

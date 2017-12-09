@@ -27,7 +27,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
 CUSTOM_COMMAND_SIG(nj_mode_enter_normal)
 CUSTOM_DOC("Activates 'normal' mode.")
 {
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+    NJ_ENTER_MODE(NJ_CURRENT_MODE);
 }
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
@@ -158,7 +158,14 @@ struct NJ_Macro_Register {
     int32_t input_count;
     NJ_Mapid initial_mode;
 };
-NJ_Macro_Register nj_macro_registers[((uint8_t)'~' - (uint8_t)'!')] = {};
+
+#define NJ_REGISTER_MIN   ((uint8_t)'!')
+#define NJ_REGISTER_MAX   ((uint8_t)'~')
+#define NJ_REGISTER_COUNT (NJ_REGISTER_MAX - NJ_REGISTER_MIN)
+#define nj_char_to_register_index(character) ((uint8_t)(character) - NJ_REGISTER_MIN)
+#define nj_register_index_to_char(index) (char)((index) + NJ_REGISTER_MIN)
+
+NJ_Macro_Register nj_macro_registers[NJ_REGISTER_COUNT] = {};
 
 int32_t nj_last_register = 0;
 
@@ -191,7 +198,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
     
     if(query_user_string(app, &query_bar)) {
         NJ_Input_Node *current_node = 0;
-        int32_t register_index = query_bar.string.str[0] - '!';
+        int32_t register_index = nj_char_to_register_index(query_bar.string.str[0]);
         
         if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
             nj_last_register = register_index;
@@ -255,7 +262,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
 
 CUSTOM_COMMAND_SIG(nj_finish_recording_keyboard_macro)
 CUSTOM_DOC("Finishes to record a keyboard macro."){
-    // NOTE(NJ): This is a stub, only so I could bind finishing a macro to a keymap
+    // NOTE(NJ): This is a stub, only so I could bind finishing a macro to a key
 }
 
 static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
@@ -302,7 +309,7 @@ CUSTOM_DOC("Querys for a macro register and number of times to play it, then pla
     register_bar.string = make_fixed_width_string(register_bar_space);
     
     if(query_user_string(app, &register_bar)) {
-        int32_t register_index = register_bar.string.str[0] - '!';
+        int32_t register_index = nj_char_to_register_index(register_bar.string.str[0]);
         
         if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
             nj_last_register = register_index;
@@ -335,7 +342,7 @@ CUSTOM_DOC("Plays the last recorded or played macro.")
 static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_t register_index){
     Assert(register_index < ArrayCount(nj_macro_registers));
     if(nj_macro_registers[register_index].root){
-        char register_char = (char)(register_index + '!');
+        char register_char = nj_register_index_to_char(register_index);
         
         char buffer_name_space[32];
         String buffer_name = make_string_cap(buffer_name_space, 0, 32);
@@ -369,55 +376,83 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
         
         NJ_Input_Node *current_node = nj_macro_registers[register_index].root;
         while(current_node){
-            // TODO(NJ): find a way to not emulate functions as the following:
-            if(current_node->input.command.command == write_character) {
+            char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
+            
+            if(command_name) {
+                int32_t key_name_size = 0;
+                char *key_name = global_key_name(current_node->input.key.keycode, &key_name_size);
                 uint8_t character[4];
                 uint32_t length = to_writable_character(current_node->input, character);
-                char length_str_space[4];
-                String length_str = make_string_cap(length_str_space, 0, 4);
-                int_to_str(&length_str, length);
                 
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("write_character_parameter(app, (uint8_t *)(\""));
-                if(character[0] == '\n') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\n"));
+                if(!key_name) {
+                    key_name = (char *)character;
+                    key_name_size = length;
+                    
+                    if(character[0] == '\n') {
+                        key_name = "\\n";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == '\t') {
+                        key_name = "\\t";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == '\v') {
+                        key_name = "\\v";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == '\f') {
+                        key_name = "\\f";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == '\r') {
+                        key_name = "\\r";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == ' ') {
+                        key_name = " ";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == '"') {
+                        key_name = "\\\"";
+                        key_name_size = str_size(key_name);
+                    }
+                    else if(character[0] == '\\') {
+                        key_name = "\\";
+                        key_name_size = str_size(key_name);
+                    }
                 }
-                else if(character[0] == '\t') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\t"));
-                }
-                else if(character[0] == '\v') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\v"));
-                }
-                else if(character[0] == '\f') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\f"));
-                }
-                else if(character[0] == '\r') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\r"));
-                }
-                else if(character[0] == ' ') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(" "));
-                }
-                else if(character[0] == '"') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\\""));
-                }
-                else if(character[0] == '\\') {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\\"));
+                // TODO(NJ): find a way to not emulate functions as the following:
+                if(current_node->input.command.command == write_character) {
+                    char length_str_space[4];
+                    String length_str = make_string_cap(length_str_space, 0, 4);
+                    int_to_str(&length_str, key_name_size);
+                    
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("write_character_parameter(app, (uint8_t *)(\""));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, key_name, key_name_size);
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\"), "));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, length_str.str, int_to_str_size(length));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(");"));
                 }
                 else {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, (char *)character, length);
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);"));
                 }
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\"), "));
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, length_str.str, int_to_str_size(length));
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(");\n"));
+                
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(" // <"));
+                if(current_node->input.key.modifiers[MDFR_SHIFT_INDEX]) {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("shift+"));
+                }
+                if(current_node->input.key.modifiers[MDFR_CONTROL_INDEX]) {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("control+"));
+                }
+                if(current_node->input.key.modifiers[MDFR_ALT_INDEX]) {
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("alt+"));
+                }
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, key_name, key_name_size);
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(">\n"));
             }
             else {
-                char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
-                if(command_name) {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);\n"));
-                }
-                else {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\n//\n// WARNING: Unkown command in this position in the macro.\n// Add CUSTOM_DOC to commands to enable printing them as a part of a macro.\n//\n\n"));
-                }
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\n//\n// WARNING: Unkown command in this position in the macro.\n// Add CUSTOM_DOC to commands to enable printing them as a part of a macro.\n//\n\n"));
             }
             
             current_node = current_node->n;
@@ -440,7 +475,7 @@ CUSTOM_DOC("Querys for a macro register and number of times to print it, then pr
     register_bar.string = make_fixed_width_string(register_bar_space);
     
     if(query_user_string(app, &register_bar)) {
-        int32_t register_index = register_bar.string.str[0] - '!';
+        int32_t register_index = nj_char_to_register_index(register_bar.string.str[0]);
         
         if(register_index < ArrayCount(nj_macro_registers) && register_index >= 0){
             nj_print_keyboard_macro_from_register(app, register_index);

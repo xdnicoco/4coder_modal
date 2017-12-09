@@ -1,11 +1,11 @@
 /*
 This mode inserts the next character pressed after activating it,
- then returns to the previous mode.
- 
+then returns to the previous mode.
+
 WARNING:
 This custom extension provided "as is" without warranty of any kind,
- either express or implied, including without limitation any implied warranties of condition,
- uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
+either express or implied, including without limitation any implied warranties of condition,
+uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement.
 */
 
 #if !defined(_MODE_CHORD_INSERT_SINGLE_CPP)
@@ -27,7 +27,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
 CUSTOM_COMMAND_SIG(nj_mode_enter_chord_insert_single)
 CUSTOM_DOC("Activates 'chord insert single' mode.")
 {
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+    NJ_ENTER_MODE(NJ_CURRENT_MODE);
 }
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){

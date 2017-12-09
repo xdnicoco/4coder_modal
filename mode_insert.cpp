@@ -26,7 +26,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
 CUSTOM_COMMAND_SIG(nj_mode_enter_insert)
 CUSTOM_DOC("Activates 'insert' mode.")
 {
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+    NJ_ENTER_MODE(NJ_CURRENT_MODE);
 }
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
@@ -46,14 +46,14 @@ CUSTOM_DOC("Inserts a newline before the line under the cursor, then activates i
     seek_beginning_of_line(app);
     write_string(app, make_lit_string("\n"));
     move_left(app);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE)
+    NJ_ENTER_MODE(NJ_CURRENT_MODE)
 }
 
 CUSTOM_COMMAND_SIG(nj_newline_then_insert_after)
 CUSTOM_DOC("Inserts a newline after the line under the cursor, then activates insert mode."){
     seek_end_of_line(app);
     write_string(app, make_lit_string("\n"));
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE)
+    NJ_ENTER_MODE(NJ_CURRENT_MODE)
 }
 
 CUSTOM_COMMAND_SIG(nj_insert_after)
@@ -65,13 +65,13 @@ CUSTOM_DOC("Moves to the next character in the current line, then activates inse
     if (buffer_get_char(app, &buffer, view.cursor.pos) != '\n') {
         move_right(app);
     }
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE)
+    NJ_ENTER_MODE(NJ_CURRENT_MODE)
 }
 
 CUSTOM_COMMAND_SIG(nj_seek_eol_then_insert)
 CUSTOM_DOC("Moves to the end of the current line, then activates insert mode."){
     seek_end_of_textual_line(app);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE)
+    NJ_ENTER_MODE(NJ_CURRENT_MODE)
 }
 
 #endif // _MODE_INSERT_CPP

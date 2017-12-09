@@ -25,7 +25,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
 CUSTOM_COMMAND_SIG(nj_mode_enter_chord_snippets)
 CUSTOM_DOC("Activates 'chord snippets' mode.")
 {
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(NJ_CURRENT_MODE);
+    NJ_ENTER_MODE(NJ_CURRENT_MODE);
 }
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
@@ -97,28 +97,28 @@ CUSTOM_COMMAND_SIG(nj_chord_snippet_todo_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// TODO' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
     seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "TODO");
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_note_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// NOTE' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
     seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "NOTE");
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_hack_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// HACK' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
     seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "HACK");
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_important_then_insert)
 CUSTOM_DOC("At the end of the line, insert a '// IMPORTANT' comment, includes user name if it was specified in config.4coder, then activate insert mode."){
     seek_end_of_textual_line(app);
     nj_chord_snippet_named_comment_string(app, "IMPORTANT");
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_zero_struct_then_prev)
@@ -153,7 +153,7 @@ CUSTOM_DOC("At the end of the line, insert a 'return();', then activate insert m
     buffer_replace_range(app, &buffer, view.cursor.pos, view.cursor.pos, str, str_size(str));
     
     nj_move_cursor_to_relative_line_then_char(app, 1, 7);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_then_insert)
@@ -162,7 +162,7 @@ CUSTOM_DOC("At the cursor, insert a '{' and '}' separated by a blank line, then 
     char text[] = " {\n\n}";
     long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_semicolon_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '};' separated by a blank line, then activate insert mode."){
@@ -170,7 +170,7 @@ CUSTOM_DOC("At the cursor, insert a '{' and '};' separated by a blank line, then
     char text[] = " {\n\n};";
     long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_long_braces_break_then_insert)
 CUSTOM_DOC("At the cursor, insert a '{' and '} break;' separated by a blank line, then activate insert mode."){
@@ -178,7 +178,7 @@ CUSTOM_DOC("At the cursor, insert a '{' and '} break;' separated by a blank line
     char text[] = " {\n\n} break;";
     long_braces(app, text, str_size(text));
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_case_then_insert)
@@ -198,7 +198,7 @@ CUSTOM_DOC("At the cursor, insert a 'case :{' and '} break;' separated by a blan
     long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 5);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_if_then_insert)
@@ -218,7 +218,7 @@ CUSTOM_DOC("At the cursor, insert a 'if(){' and '}' separated by a blank line, t
     long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 3);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_else_if_then_insert)
@@ -238,7 +238,7 @@ CUSTOM_DOC("At the cursor, insert a 'else if(){' and '}' separated by a blank li
     long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 8);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_else_then_insert)
@@ -258,7 +258,7 @@ CUSTOM_DOC("At the cursor, insert a 'else {' and '}' separated by a blank line, 
     long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 1, 0);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_for_then_insert)
@@ -278,7 +278,7 @@ CUSTOM_DOC("At the cursor, insert a 'for(;;){' and '} ' separated by a blank lin
     long_braces(app, text, str_size(text));
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 4);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_while_then_insert)
@@ -299,7 +299,7 @@ CUSTOM_DOC("At the cursor, insert a 'while(){' and '} ' separated by a blank lin
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 6);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_switch_then_insert)
@@ -320,14 +320,14 @@ CUSTOM_DOC("At the cursor, insert a 'switch(){' and '} ' separated by a blank li
     long_braces(app, text, size);
     
     nj_move_cursor_to_relative_line_then_char(app, 0, 7);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_block_then_insert)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ' /*  */', then activate insert mode."){
     seek_end_of_textual_line(app);
     write_string(app, make_lit_string(" /*  */"));
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(insert);
+    NJ_ENTER_MODE(insert);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_semicolon)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ';'."){

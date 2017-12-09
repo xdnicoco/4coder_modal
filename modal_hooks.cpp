@@ -40,7 +40,7 @@ nj_4coder_initialized_by_space(Application_Links *app, Buffer_Identifier first_b
     set_active_view(app, &view);
     
     nj_set_modal_color_theme(app);
-    NJ_MODE_ACTIVATE_ENTER_FUNCTION(normal);
+    NJ_ENTER_MODE(normal);
 }
 
 static void
