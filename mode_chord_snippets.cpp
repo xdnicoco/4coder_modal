@@ -361,7 +361,8 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    int32_t pos = seek_line_beginning(app, &buffer, view.cursor.pos);
+    move_past_lead_whitespace(app, &view, &buffer);
+    int32_t pos = view.cursor.pos;
     if(buffer_get_char(app, &buffer, pos) == '/' &&
        buffer_get_char(app, &buffer, pos + 1) == '/') {
         buffer_replace_range(app, &buffer, pos, pos + 2, 0, 0);
