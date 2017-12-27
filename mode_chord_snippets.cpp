@@ -346,7 +346,7 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a ';', then return t
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash)
 CUSTOM_DOC("At the end of the line under the cursor, insert a '\\'."){
     seek_end_of_textual_line(app);
-    write_string(app, make_lit_string("\\"));
+    write_string(app, make_lit_string(" \\"));
     move_down_textual(app);
 }
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash_then_prev)
@@ -361,6 +361,7 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
+    seek_beginning_of_textual_line(app);
     move_past_lead_whitespace(app, &view, &buffer);
     int32_t pos = view.cursor.pos;
     if(buffer_get_char(app, &buffer, pos) == '/' &&
