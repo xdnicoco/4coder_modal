@@ -65,7 +65,8 @@ modifier(chord_insert_single)\
 modifier(chord_snippets)\
 modifier(chord_settings)\
 modifier(chord_case)\
-modifier(chord_goto)
+modifier(chord_goto) \
+modifier(search)
 
 enum NJ_Mapid {
     mapid_normal = mapid_global,
@@ -162,6 +163,10 @@ CUSTOM_DOC("Activate the mode previous to the current mode.")
 #undef NJ_CURRENT_MODE
 
 #define NJ_CURRENT_MODE chord_goto
+#include NJ_INCLUDE_MODE_FILE(NJ_CURRENT_MODE)
+#undef NJ_CURRENT_MODE
+
+#define NJ_CURRENT_MODE search
 #include NJ_INCLUDE_MODE_FILE(NJ_CURRENT_MODE)
 #undef NJ_CURRENT_MODE
 
@@ -398,7 +403,7 @@ nj_keys(Bind_Helper *context){
     bind(context, 'w', MDFR_NONE, change_active_panel);
     bind(context, 'W', MDFR_NONE, change_active_panel_backwards);
     
-    bind(context, '/', MDFR_NONE, search);
+    bind(context, '/', MDFR_NONE, nj_mode_enter_search);
     bind(context, 'n', MDFR_NONE, goto_next_error);
     bind(context, 'N', MDFR_NONE, goto_prev_error);
     bind(context, 'm', MDFR_NONE, goto_first_error);
