@@ -562,7 +562,8 @@ CUSTOM_DOC("Execute a 'long form' command.") {
              match_ss(bar.string, make_lit_string("open * -r"))){
         open_all_code_recursive(app);
     }
-    else if(match_ss(bar.string, make_lit_string("close all code"))){
+    else if(match_ss(bar.string, make_lit_string("close all code")) ||
+            match_ss(bar.string, make_lit_string("close *"))){
         close_all_code(app);
     }
     else if (match_ss(bar.string, make_lit_string("dos lines")) ||
@@ -576,6 +577,10 @@ CUSTOM_DOC("Execute a 'long form' command.") {
     else if (match_ss(bar.string, make_lit_string("remap")) ||
              match_ss(bar.string, make_lit_string("mode"))){
         remap_interactive(app);
+    }
+    else if (match_ss(bar.string, make_lit_string("reopen")) ||
+             match_ss(bar.string, make_lit_string("reload"))){
+        reopen(app);
     }
     else if (match_ss(bar.string, make_lit_string("new project"))){
         setup_new_project(app);
