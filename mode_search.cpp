@@ -8,7 +8,8 @@ struct NJ_Search_State {
     Query_Bar bar;
     bool32 reverse;
 };
-char nj_search_state_string_space[256];
+#define NJ_SEARCH_STATE_STRING_SPACE 1024
+char nj_search_state_string_space[NJ_SEARCH_STATE_STRING_SPACE];
 NJ_Search_State nj_search_state;
 
 #define NJ_MODE_PRINT_ENTER_HOOK \
@@ -49,12 +50,14 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, key_page_up, MDFR_NONE, nj_search_step_backward);
     bind(context, key_page_down, MDFR_NONE, nj_search_step_forward);
     
+    bind(context, 'v', MDFR_CTRL, nj_search_paste);
+    
     bind(context, '\n', MDFR_NONE, nj_search_complete);
     bind(context, key_esc, MDFR_NONE, nj_search_cancel);
     end_map(context);
 }
 
-inline void nj_apply_search(Application_Links *app, bool32 step=false) {
+inline void nj_search_apply(Application_Links *app, bool32 step=false) {
     uint32_t access = AccessProtected;
     
     View_Summary view = get_active_view(app, access);
@@ -106,7 +109,7 @@ CUSTOM_DOC("Appends a char from a search string.") {
     
     if (length != 0 && key_is_unmodified(&in.key)){
         append_ss(&nj_search_state.bar.string, make_string(character, length));
-        nj_apply_search(app);
+        nj_search_apply(app);
     }
 }
 
@@ -117,7 +120,7 @@ CUSTOM_DOC("Backspaces a char from a search string.") {
         if (nj_search_state.match.end > nj_search_state.match.start + nj_search_state.bar.string.size){
             nj_search_state.match.end = nj_search_state.match.start + nj_search_state.bar.string.size;
         }
-        nj_apply_search(app);
+        nj_search_apply(app);
     }
 }
 
@@ -133,7 +136,7 @@ CUSTOM_DOC("Moves to the next match in the search.") {
         bool32 step = false;
     }
     
-    nj_apply_search(app, step);
+    nj_search_apply(app, step);
 }
 
 CUSTOM_COMMAND_SIG(nj_search_step_backward)
@@ -148,7 +151,7 @@ CUSTOM_DOC("Moves to the previous match in the search.") {
         step = false;
     }
     
-    nj_apply_search(app, step);
+    nj_search_apply(app, step);
 }
 
 CUSTOM_COMMAND_SIG(nj_search_cancel)
@@ -166,6 +169,26 @@ CUSTOM_DOC("Seek back to position before starting the search, then activate the 
     end_query_bar(app, &nj_search_state.bar, 0);
     view_set_highlight(app, &view, 0, 0, false);
     nj_activate_previous_mode(app);
+}
+
+CUSTOM_COMMAND_SIG(nj_search_paste)
+CUSTOM_DOC("Insert the text at the top of the clipboard to the active search query.") {
+    uint32_t access = AccessProtected;
+    int32_t count = clipboard_count(app, 0);
+    if (count > 0){
+        View_Summary view = get_active_view(app, access);
+        
+        int32_t paste_index = 0;
+        view_paste_index[view.view_id].index = paste_index;
+        
+        int32_t len = clipboard_index(app, 0, paste_index, 0, 0);
+        
+        if (len <= (NJ_SEARCH_STATE_STRING_SPACE-nj_search_state.bar.string.size)){
+            clipboard_index(app, 0, paste_index, (nj_search_state.bar.string.str + nj_search_state.bar.string.size), len);
+            nj_search_state.bar.string.size += len;
+            nj_search_apply(app);
+        }
+    }
 }
 
 #endif // _MODE_SEARCH_CPP
