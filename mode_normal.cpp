@@ -278,12 +278,12 @@ static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t
                 uint32_t length = to_writable_character(current_node->input, character);
                 write_character_parameter(app, character, length);
             }
-            else if(current_node->input.command.command == nj_search_append_char) {
+            else if(current_node->input.command.command == nj_mode_search_append_char) {
                 uint8_t character[4];
                 uint32_t length = to_writable_character(current_node->input, character);
                 
                 if (length != 0){
-                    append_ss(&nj_search_state.bar.string, make_string(character, length));
+                    append_ss(&nj_mode_search_state.bar.string, make_string(character, length));
                     nj_mode_search_apply(app);
                 }
             }

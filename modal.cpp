@@ -68,8 +68,8 @@ struct NJ_Search_State {
     bool32 step;
 };
 #define NJ_SEARCH_STATE_STRING_SPACE 1024
-char nj_search_state_string_space[NJ_SEARCH_STATE_STRING_SPACE];
-NJ_Search_State nj_search_state;
+char nj_mode_search_state_string_space[NJ_SEARCH_STATE_STRING_SPACE];
+NJ_Search_State nj_mode_search_state;
 
 enum NJ_Chord_Goto_State_Mode {
     nj_chord_goto_mode_absolute,
