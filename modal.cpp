@@ -57,6 +57,36 @@ static char *nj_get_command_name_by_pointer(Custom_Command_Function *command){
 // Modes
 //
 
+// Mode Global storage {
+
+struct NJ_Search_State {
+    Full_Cursor last_position;
+    int32_t position;
+    Range match;
+    Query_Bar bar;
+    bool32 reverse;
+    bool32 step;
+};
+#define NJ_SEARCH_STATE_STRING_SPACE 1024
+char nj_search_state_string_space[NJ_SEARCH_STATE_STRING_SPACE];
+NJ_Search_State nj_search_state;
+
+enum NJ_Chord_Goto_State_Mode {
+    nj_chord_goto_mode_absolute,
+    nj_chord_goto_mode_add,
+    nj_chord_goto_mode_sub,
+    nj_chord_goto_mode_cancel,
+};
+
+struct NJ_Chord_Goto_State {
+    int32_t line_input;
+    Full_Cursor last_position;
+    NJ_Chord_Goto_State_Mode goto_mode;
+};
+NJ_Chord_Goto_State nj_chord_goto_state = {0};
+
+// }
+
 #define NJ_MODES(modifier) \
 modifier(insert)\
 modifier(replace)\

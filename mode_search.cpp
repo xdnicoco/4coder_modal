@@ -1,17 +1,6 @@
 #if !defined(_MODE_SEARCH_CPP)
 #define _MODE_SEARCH_CPP
 
-struct NJ_Search_State {
-    Full_Cursor last_position;
-    int32_t position;
-    Range match;
-    Query_Bar bar;
-    bool32 reverse;
-};
-#define NJ_SEARCH_STATE_STRING_SPACE 1024
-char nj_search_state_string_space[NJ_SEARCH_STATE_STRING_SPACE];
-NJ_Search_State nj_search_state;
-
 #define NJ_MODE_PRINT_ENTER_HOOK \
 View_Summary view = get_active_view(app, AccessAll);\
 nj_search_state.last_position = view.cursor;\
@@ -20,6 +9,7 @@ nj_search_state.match = make_range(nj_search_state.position, nj_search_state.pos
 nj_search_state.bar.string = make_fixed_width_string(nj_search_state_string_space); \
 nj_search_state.bar.prompt = make_lit_string("I-Search: "); \
 nj_search_state.reverse = false; \
+nj_search_state.step = false; \
 if (start_query_bar(app, &nj_search_state.bar, 0) == 0) return;
 
 NJ_MODE_PRINT_ENTER_FUNCTION(NJ_CURRENT_MODE,
@@ -57,7 +47,8 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
-inline void nj_search_apply(Application_Links *app, bool32 step=false) {
+CUSTOM_COMMAND_SIG(nj_search_apply)
+CUSTOM_DOC("Applies a search query.") {
     uint32_t access = AccessProtected;
     
     View_Summary view = get_active_view(app, access);
@@ -69,7 +60,7 @@ inline void nj_search_apply(Application_Links *app, bool32 step=false) {
         int32_t new_pos = 0;
         buffer_seek_string_insensitive_backward(app, &buffer, start_pos - 1, 0, nj_search_state.bar.string.str, nj_search_state.bar.string.size, &new_pos);
         if (new_pos >= 0){
-            if (step){
+            if (nj_search_state.step){
                 nj_search_state.position = new_pos;
                 start_pos = new_pos;
                 buffer_seek_string_insensitive_backward(app, &buffer, start_pos - 1, 0, nj_search_state.bar.string.str, nj_search_state.bar.string.size, &new_pos);
@@ -85,7 +76,7 @@ inline void nj_search_apply(Application_Links *app, bool32 step=false) {
         int32_t new_pos = 0;
         buffer_seek_string_insensitive_forward(app, &buffer, start_pos + 1, 0, nj_search_state.bar.string.str, nj_search_state.bar.string.size, &new_pos);
         if (new_pos < buffer.size){
-            if (step){
+            if (nj_search_state.step){
                 nj_search_state.position = new_pos;
                 start_pos = new_pos;
                 buffer_seek_string_insensitive_forward(app, &buffer, start_pos + 1, 0, nj_search_state.bar.string.str, nj_search_state.bar.string.size, &new_pos);
@@ -97,6 +88,7 @@ inline void nj_search_apply(Application_Links *app, bool32 step=false) {
             nj_search_state.match.end = nj_search_state.match.start + nj_search_state.bar.string.size;
         }
     }
+    nj_search_state.step = false;
     
     view_set_highlight(app, &view, nj_search_state.match.start, nj_search_state.match.end, true);
 }
@@ -127,31 +119,31 @@ CUSTOM_DOC("Backspaces a char from a search string.") {
 CUSTOM_COMMAND_SIG(nj_search_step_forward)
 CUSTOM_DOC("Moves to the next match in the search.") {
     int32_t start_pos = nj_search_state.position;
-    bool32 step = true;
+    nj_search_state.step = true;
     
     if (nj_search_state.reverse){
         start_pos = nj_search_state.match.start + 1;
         nj_search_state.position = start_pos;
         nj_search_state.reverse = false;
-        bool32 step = false;
+        nj_search_state.step = false;
     }
     
-    nj_search_apply(app, step);
+    nj_search_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_search_step_backward)
 CUSTOM_DOC("Moves to the previous match in the search.") {
     int32_t start_pos = nj_search_state.position;
-    bool32 step = true;
+    nj_search_state.step = true;
     
     if (!nj_search_state.reverse){
         start_pos = nj_search_state.match.start - 1;
         nj_search_state.position = start_pos;
         nj_search_state.reverse = true;
-        step = false;
+        nj_search_state.step= false;
     }
     
-    nj_search_apply(app, step);
+    nj_search_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_search_cancel)

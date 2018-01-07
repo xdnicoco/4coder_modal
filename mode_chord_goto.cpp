@@ -10,21 +10,6 @@ This custom extension provided "as is" without warranty of any kind,
 #if !defined(_MODE_CHORD_GOTO_CPP)
 #define _MODE_CHORD_GOTO_CPP
 
-
-enum NJ_Chord_Goto_State_Mode {
-    nj_chord_goto_mode_absolute,
-    nj_chord_goto_mode_add,
-    nj_chord_goto_mode_sub,
-    nj_chord_goto_mode_cancel,
-};
-
-struct NJ_Chord_Goto_State {
-    int32_t line_input;
-    Full_Cursor last_position;
-    NJ_Chord_Goto_State_Mode goto_mode;
-};
-NJ_Chord_Goto_State nj_chord_goto_state = {0};
-
 #define NJ_MODE_PRINT_ENTER_HOOK \
 View_Summary view = get_active_view(app, AccessAll);\
 nj_chord_goto_state.line_input = 0;\
