@@ -284,21 +284,19 @@ static void nj_play_keyboard_macro_from_register(Application_Links *app, int32_t
                 
                 if (length != 0){
                     append_ss(&nj_search_state.bar.string, make_string(character, length));
-                    nj_search_apply(app);
+                    nj_mode_search_apply(app);
                 }
             }
-#if 0
             else if(current_node->input.command.command == nj_chord_goto_seek_line) {
                 if(char_is_numeric((char)current_node->input.key.character))
                 {
                     char input_character[] = {(char)current_node->input.key.character, 0};
                     i32_4tech input_digit = str_to_int_c(input_character);
                     
-                    NJ_MODE_STATE(chord_goto).line_input = NJ_MODE_STATE(chord_goto).line_input*10 + input_digit;
-                    nj_chord_goto_apply_seek(app);
+                    nj_chord_goto_state.line_input = nj_chord_goto_state.line_input*10 + input_digit;
+                    nj_chord_goto_apply(app);
                 }
             }
-#endif
             else {
                 current_node->input.command.command(app);
             }

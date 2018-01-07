@@ -47,7 +47,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
-CUSTOM_COMMAND_SIG(nj_search_apply)
+CUSTOM_COMMAND_SIG(nj_mode_search_apply)
 CUSTOM_DOC("Applies a search query.") {
     uint32_t access = AccessProtected;
     
@@ -101,7 +101,7 @@ CUSTOM_DOC("Appends a char from a search string.") {
     
     if (length != 0 && key_is_unmodified(&in.key)){
         append_ss(&nj_search_state.bar.string, make_string(character, length));
-        nj_search_apply(app);
+        nj_mode_search_apply(app);
     }
 }
 
@@ -112,7 +112,7 @@ CUSTOM_DOC("Backspaces a char from a search string.") {
         if (nj_search_state.match.end > nj_search_state.match.start + nj_search_state.bar.string.size){
             nj_search_state.match.end = nj_search_state.match.start + nj_search_state.bar.string.size;
         }
-        nj_search_apply(app);
+        nj_mode_search_apply(app);
     }
 }
 
@@ -128,7 +128,7 @@ CUSTOM_DOC("Moves to the next match in the search.") {
         nj_search_state.step = false;
     }
     
-    nj_search_apply(app);
+    nj_mode_search_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_search_step_backward)
@@ -143,7 +143,7 @@ CUSTOM_DOC("Moves to the previous match in the search.") {
         nj_search_state.step= false;
     }
     
-    nj_search_apply(app);
+    nj_mode_search_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_search_cancel)
@@ -178,7 +178,7 @@ CUSTOM_DOC("Insert the text at the top of the clipboard to the active search que
         if (len <= (NJ_SEARCH_STATE_STRING_SPACE-nj_search_state.bar.string.size)){
             clipboard_index(app, 0, paste_index, (nj_search_state.bar.string.str + nj_search_state.bar.string.size), len);
             nj_search_state.bar.string.size += len;
-            nj_search_apply(app);
+            nj_mode_search_apply(app);
         }
     }
 }

@@ -66,7 +66,9 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
-inline void nj_chord_goto_apply_seek(Application_Links *app){
+CUSTOM_COMMAND_SIG(nj_chord_goto_apply)
+CUSTOM_DOC("Applies changes made to the goto mode state."){
+    
     uint32_t line_number;
     View_Summary view = get_active_view(app, AccessProtected);
     
@@ -123,38 +125,38 @@ CUSTOM_DOC("If the character used to trigger this command is numeric, adds it to
         print_message(app, msg, str_size(msg));
 #endif
         nj_chord_goto_state.line_input = nj_chord_goto_state.line_input*10 + input_digit;
-        nj_chord_goto_apply_seek(app);
+        nj_chord_goto_apply(app);
     }
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_set_mode_add)
 CUSTOM_DOC("Sets the goto chord mode to addition, then calculates the target line number."){
     nj_chord_goto_state.goto_mode = nj_chord_goto_mode_add;
-    nj_chord_goto_apply_seek(app);
+    nj_chord_goto_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_set_mode_sub)
 CUSTOM_DOC("Sets the goto chord mode to subtraction, then calculates the target line number."){
     nj_chord_goto_state.goto_mode = nj_chord_goto_mode_sub;
-    nj_chord_goto_apply_seek(app);
+    nj_chord_goto_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_set_mode_absolute)
 CUSTOM_DOC("Sets the goto chord mode to absolute, then calculates the target line number."){
     nj_chord_goto_state.goto_mode = nj_chord_goto_mode_absolute;
-    nj_chord_goto_apply_seek(app);
+    nj_chord_goto_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_backspace)
 CUSTOM_DOC("Devides the goto line number input by 10, then calculates the target line number."){
     nj_chord_goto_state.line_input /= 10;
-    nj_chord_goto_apply_seek(app);
+    nj_chord_goto_apply(app);
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_cancel)
 CUSTOM_DOC("Seek back to the line number before entering chord goto mode, then activate the previous mode."){
     nj_chord_goto_state.goto_mode = nj_chord_goto_mode_cancel;
-    nj_chord_goto_apply_seek(app);
+    nj_chord_goto_apply(app);
     nj_activate_previous_mode(app);
 }
 
