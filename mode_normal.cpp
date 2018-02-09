@@ -384,65 +384,58 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
         
         NJ_Input_Node *current_node = nj_macro_registers[register_index].root;
         while(current_node){
-            char *command_name = nj_get_command_name_by_pointer(current_node->input.command.command);
+            Command_Metadata command_meta = nj_get_command_metadata_by_pointer(current_node->input.command.command);
             
-            if(command_name) {
-                int32_t key_name_size = 0;
-                char *key_name = global_key_name(current_node->input.key.keycode, &key_name_size);
-                uint8_t character[4];
-                uint32_t length = to_writable_character(current_node->input, character);
-                
-                if(!key_name) {
-                    key_name = (char *)character;
-                    key_name_size = length;
+            if(command_meta.name) {
+                String key_name = {};
+                key_name.str = global_key_name(current_node->input.key.keycode, &key_name.size);
+                if((key_name.size == 0) && (current_node->input.type != UserInputNone)) {
+                    uint8_t character[4];
+                    uint32_t length = to_writable_character(current_node->input, character);
+                    
+                    key_name.str = (char *)character;
+                    key_name.size = length;
                     
                     if(character[0] == '\n') {
-                        key_name = "\\n";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\n");
                     }
                     else if(character[0] == '\t') {
-                        key_name = "\\t";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\t");
                     }
                     else if(character[0] == '\v') {
-                        key_name = "\\v";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\v");
                     }
                     else if(character[0] == '\f') {
-                        key_name = "\\f";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\f");
                     }
                     else if(character[0] == '\r') {
-                        key_name = "\\r";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\r");
                     }
                     else if(character[0] == ' ') {
-                        key_name = " ";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string(" ");
                     }
                     else if(character[0] == '"') {
-                        key_name = "\\\"";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\\"");
                     }
                     else if(character[0] == '\\') {
-                        key_name = "\\";
-                        key_name_size = str_size(key_name);
+                        key_name = make_lit_string("\\");
                     }
                 }
+                
                 // TODO(NJ): find a way to not emulate functions as the following:
                 if(current_node->input.command.command == write_character) {
                     char length_str_space[4];
                     String length_str = make_string_cap(length_str_space, 0, 4);
-                    int_to_str(&length_str, key_name_size);
+                    int_to_str(&length_str, key_name.size);
                     
                     buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("write_character_parameter(app, (uint8_t *)(\""));
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, key_name, key_name_size);
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, key_name.str, key_name.size);
                     buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("\"), "));
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, length_str.str, int_to_str_size(length));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, length_str.str, length_str.size);
                     buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(");"));
                 }
                 else {
-                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_name, str_size(command_name));
+                    buffer_replace_range(app, &buffer, buffer.size, buffer.size, command_meta.name, command_meta.name_len);
                     buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("(app);"));
                 }
                 
@@ -456,7 +449,7 @@ static void nj_print_keyboard_macro_from_register(Application_Links *app, int32_
                 if(current_node->input.key.modifiers[MDFR_ALT_INDEX]) {
                     buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal("alt+"));
                 }
-                buffer_replace_range(app, &buffer, buffer.size, buffer.size, key_name, key_name_size);
+                buffer_replace_range(app, &buffer, buffer.size, buffer.size, key_name.str, key_name.size);
                 buffer_replace_range(app, &buffer, buffer.size, buffer.size, literal(">\n"));
             }
             else {
@@ -585,6 +578,9 @@ CUSTOM_DOC("Execute a 'long form' command.") {
              match_ss(bar.string, make_lit_string("mode"))){
         remap_interactive(app);
     }
+    else if (match_ss(bar.string, make_lit_string("desck"))){
+        describe_key(app);
+    }
     else if (match_ss(bar.string, make_lit_string("reopen")) ||
              match_ss(bar.string, make_lit_string("reload"))){
         reopen(app);
@@ -616,9 +612,9 @@ CUSTOM_DOC("Execute a 'long form' command.") {
     else{
         replace_char(&bar.string, ' ', '_');
         
-        Custom_Command_Function *command = nj_get_command_pointer_by_name(bar.string);
-        if(command) {
-            command(app);
+        Command_Metadata command_meta = nj_get_command_metadata_by_name(bar.string);
+        if(command_meta.proc) {
+            command_meta.proc(app);
         }
         else {
             print_message(app, literal("unrecognized command: "));

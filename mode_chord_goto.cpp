@@ -36,7 +36,7 @@ CUSTOM_DOC("Activates 'chord goto' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap);
+    inherit_map(context, mapid_musthave);
     bind(context,'0', MDFR_NONE, nj_chord_goto_seek_line);
     bind(context,'1', MDFR_NONE, nj_chord_goto_seek_line);
     bind(context,'2', MDFR_NONE, nj_chord_goto_seek_line);

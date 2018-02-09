@@ -32,7 +32,7 @@ CUSTOM_DOC("Activates 'chord case' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap);
+    inherit_map(context, mapid_musthave);
     bind(context, 'L', MDFR_NONE, nj_chord_case_lower_token_or_word);
     bind(context, 'l', MDFR_NONE, nj_chord_case_lower);
     bind(context, 'U', MDFR_NONE, nj_chord_case_upper_token_or_word);

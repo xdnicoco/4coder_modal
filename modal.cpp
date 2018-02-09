@@ -29,29 +29,119 @@ static void nj_invert_colors(Theme_Color *colors, int32_t len){
     }
 }
 
+//
+// Command Metadata Utilities {
+//
+
 // TODO(NJ): Ask Allen if it is possible to add command_id to Generic_Command
 // HACK(NJ): O(n^2) very bad, that it is
-static Custom_Command_Function *nj_get_command_pointer_by_name(String name){
-    Custom_Command_Function *result = 0;
+// HACK(NJ): SADNESS AND TERRIBLENESS :O
+static Command_Metadata nj_get_command_metadata_by_name(String name){
+    Command_Metadata result = {0};
     for(int32_t i = 0; i < command_one_past_last_id; ++i) {
         if(match_sc(name, fcoder_metacmd_table[i].name)) {
-            result = fcoder_metacmd_table[i].proc;
+            result = fcoder_metacmd_table[i];
             break;
         }
     }
     return(result);
 }
 
-static char *nj_get_command_name_by_pointer(Custom_Command_Function *command){
-    char *result = 0;
+static Command_Metadata nj_get_command_metadata_by_pointer(Custom_Command_Function *command){
+    Command_Metadata result = {0};
     for(int32_t i = 0; i < command_one_past_last_id; ++i) {
         if(command == fcoder_metacmd_table[i].proc) {
-            result = fcoder_metacmd_table[i].name;
+            result = fcoder_metacmd_table[i];
             break;
         }
     }
     return(result);
 }
+
+CUSTOM_COMMAND_SIG(describe_key)
+CUSTOM_DOC("") {
+    User_Input in = {0};
+    
+    in = get_user_input(app, EventOnAnyKey, 0);
+    
+    String key_name = {};
+    key_name.str = global_key_name(in.key.keycode, &key_name.size);
+    if((key_name.size == 0) && (in.type != UserInputNone)) {
+        uint8_t character[4];
+        uint32_t length = to_writable_character(in, character);
+        
+        key_name.str = (char *)character;
+        key_name.size = length;
+        
+        if(character[0] == '\n') {
+            key_name = make_lit_string("\\n");
+        }
+        else if(character[0] == '\t') {
+            key_name = make_lit_string("\\t");
+        }
+        else if(character[0] == '\v') {
+            key_name = make_lit_string("\\v");
+        }
+        else if(character[0] == '\f') {
+            key_name = make_lit_string("\\f");
+        }
+        else if(character[0] == '\r') {
+            key_name = make_lit_string("\\r");
+        }
+        else if(character[0] == ' ') {
+            key_name = make_lit_string(" ");
+        }
+        else if(character[0] == '"') {
+            key_name = make_lit_string("\\\"");
+        }
+        else if(character[0] == '\\') {
+            key_name = make_lit_string("\\");
+        }
+    }
+    
+    Command_Metadata command_meta = nj_get_command_metadata_by_pointer(in.command.command);
+    if(command_meta.proc) {
+        print_message(app, literal("The command for <"));
+        if(in.key.modifiers[MDFR_SHIFT_INDEX]) {
+            print_message(app, literal("shift+"));
+        }
+        if(in.key.modifiers[MDFR_CONTROL_INDEX]) {
+            print_message(app, literal("control+"));
+        }
+        if(in.key.modifiers[MDFR_ALT_INDEX]) {
+            print_message(app, literal("alt+"));
+        }
+        
+        print_message(app, key_name.str, key_name.size);
+        print_message(app, literal("> is: ["));
+        
+        print_message(app, command_meta.name, command_meta.name_len);
+        print_message(app, literal("]\nAt: "));
+        print_message(app, command_meta.source_name, command_meta.source_name_len);
+        print_message(app, literal("\n"));
+        
+        print_message(app, command_meta.description, command_meta.description_len);
+        print_message(app, literal("\n"));
+    }
+    else {
+        print_message(app, literal("The key <"));
+        if(in.key.modifiers[MDFR_SHIFT_INDEX]) {
+            print_message(app, literal("shift+"));
+        }
+        if(in.key.modifiers[MDFR_CONTROL_INDEX]) {
+            print_message(app, literal("control+"));
+        }
+        if(in.key.modifiers[MDFR_ALT_INDEX]) {
+            print_message(app, literal("alt+"));
+        }
+        
+        print_message(app, key_name.str, key_name.size);
+        print_message(app, literal("> is not bound to any command.\n"));
+    }
+}
+
+// }
+
 
 //
 // Modes
@@ -100,7 +190,8 @@ modifier(search)
 
 enum NJ_Mapid {
     mapid_normal = mapid_global,
-    mapid_movements = 80000,
+    mapid_musthave = 80000,
+    mapid_movements,
     mapid_common,
     
 #define NJ_MODE_MAPID(mode) mapid_##mode,
@@ -242,10 +333,14 @@ inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
 
 void
 nj_keys(Bind_Helper *context){
-    begin_map(context, mapid_common);
+    begin_map(context, mapid_musthave);
+    bind(context, ':', MDFR_CTRL, nj_execute_arbitrary_command);
     bind(context, key_f4, MDFR_ALT,  exit_4coder);
     bind(context, 'q',    MDFR_CTRL, exit_4coder);
+    end_map(context);
     
+    begin_map(context, mapid_common);
+    inherit_map(context, mapid_musthave);
     bind(context, ' ', MDFR_ALT, nj_toggler);
     
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);

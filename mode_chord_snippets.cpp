@@ -30,7 +30,7 @@ CUSTOM_DOC("Activates 'chord snippets' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap);
+    inherit_map(context, mapid_musthave);
     bind(context, 'T', MDFR_NONE, nj_chord_snippet_todo_then_insert);
     bind(context, 'N', MDFR_NONE, nj_chord_snippet_note_then_insert);
     bind(context, 'H', MDFR_NONE, nj_chord_snippet_hack_then_insert);
