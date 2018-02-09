@@ -210,6 +210,7 @@ CUSTOM_DOC("") {
         print_message(app, key_name.str, key_name.size);
         print_message(app, literal("> is not bound to any command.\n"));
     }
+    print_message(app, literal("\n"));
     
     end_query_bar(app, &info_bar, 0);
 }
