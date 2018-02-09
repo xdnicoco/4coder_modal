@@ -126,7 +126,93 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
-
+CUSTOM_COMMAND_SIG(describe_key)
+CUSTOM_DOC("") {
+    Query_Bar info_bar = {0};
+    info_bar.prompt = make_lit_string("Press the desired keys to get it's description appended to the *messages* buffer: ");
+    start_query_bar(app, &info_bar, 0);
+    
+    User_Input in = {0};
+    
+    in = get_user_input(app, EventOnAnyKey, 0);
+    
+    String key_name = {};
+    key_name.str = global_key_name(in.key.keycode, &key_name.size);
+    if((key_name.size == 0) && (in.type != UserInputNone)) {
+        uint8_t character[4];
+        uint32_t length = to_writable_character(in, character);
+        
+        key_name.str = (char *)character;
+        key_name.size = length;
+        
+        if(character[0] == '\n') {
+            key_name = make_lit_string("\\n");
+        }
+        else if(character[0] == '\t') {
+            key_name = make_lit_string("\\t");
+        }
+        else if(character[0] == '\v') {
+            key_name = make_lit_string("\\v");
+        }
+        else if(character[0] == '\f') {
+            key_name = make_lit_string("\\f");
+        }
+        else if(character[0] == '\r') {
+            key_name = make_lit_string("\\r");
+        }
+        else if(character[0] == ' ') {
+            key_name = make_lit_string(" ");
+        }
+        else if(character[0] == '"') {
+            key_name = make_lit_string("\\\"");
+        }
+        else if(character[0] == '\\') {
+            key_name = make_lit_string("\\");
+        }
+    }
+    
+    Command_Metadata command_meta = nj_get_command_metadata_by_pointer(in.command.command);
+    if(command_meta.proc) {
+        print_message(app, literal("The command for <"));
+        if(in.key.modifiers[MDFR_SHIFT_INDEX]) {
+            print_message(app, literal("shift+"));
+        }
+        if(in.key.modifiers[MDFR_CONTROL_INDEX]) {
+            print_message(app, literal("control+"));
+        }
+        if(in.key.modifiers[MDFR_ALT_INDEX]) {
+            print_message(app, literal("alt+"));
+        }
+        
+        print_message(app, key_name.str, key_name.size);
+        print_message(app, literal("> is: ["));
+        
+        print_message(app, command_meta.name, command_meta.name_len);
+        print_message(app, literal("]\nAt: "));
+        print_message(app, command_meta.source_name, command_meta.source_name_len);
+        print_message(app, literal("\n"));
+        
+        print_message(app, command_meta.description, command_meta.description_len);
+        print_message(app, literal("\n"));
+    }
+    else {
+        print_message(app, literal("The key <"));
+        if(in.key.modifiers[MDFR_SHIFT_INDEX]) {
+            print_message(app, literal("shift+"));
+        }
+        if(in.key.modifiers[MDFR_CONTROL_INDEX]) {
+            print_message(app, literal("control+"));
+        }
+        if(in.key.modifiers[MDFR_ALT_INDEX]) {
+            print_message(app, literal("alt+"));
+        }
+        
+        print_message(app, key_name.str, key_name.size);
+        print_message(app, literal("> is not bound to any command.\n"));
+    }
+    
+    end_query_bar(app, &info_bar, 0);
+}
 
 /*
  NOTE(NJ): The following section implements keyboard macros.
