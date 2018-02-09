@@ -664,7 +664,7 @@ CUSTOM_DOC("Execute a 'long form' command.") {
              match_ss(bar.string, make_lit_string("mode"))){
         remap_interactive(app);
     }
-    else if (match_ss(bar.string, make_lit_string("desck"))){
+    else if (match_ss(bar.string, make_lit_string("desc"))){
         describe_key(app);
     }
     else if (match_ss(bar.string, make_lit_string("reopen")) ||
