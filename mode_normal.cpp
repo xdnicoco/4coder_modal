@@ -126,7 +126,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     end_map(context);
 }
 
-CUSTOM_COMMAND_SIG(describe_key)
+CUSTOM_COMMAND_SIG(nj_describe_key)
 CUSTOM_DOC("") {
     Query_Bar info_bar = {0};
     info_bar.prompt = make_lit_string("Press the desired keys to get it's description appended to the *messages* buffer: ");
@@ -665,7 +665,7 @@ CUSTOM_DOC("Execute a 'long form' command.") {
         remap_interactive(app);
     }
     else if (match_ss(bar.string, make_lit_string("desc"))){
-        describe_key(app);
+        nj_describe_key(app);
     }
     else if (match_ss(bar.string, make_lit_string("reopen")) ||
              match_ss(bar.string, make_lit_string("reload"))){
