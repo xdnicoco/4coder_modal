@@ -30,6 +30,7 @@ CUSTOM_DOC("Activates 'normal' mode.")
     NJ_ENTER_MODE(NJ_CURRENT_MODE);
 }
 
+
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
     inherit_map(context, mapid_movements);
@@ -75,7 +76,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, ' ', MDFR_NONE, set_mark);
     bind(context, '_', MDFR_NONE, write_character);
     
-    bind(context, 'L', MDFR_ALT, to_lowercase);
+    bind(context, 'L', MDFR_ALT,  to_lowercase);
     bind(context, 'U', MDFR_ALT,  to_uppercase);
     
     bind(context, 't', MDFR_NONE, list_all_substring_locations_case_insensitive);
@@ -127,7 +128,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
 }
 
 CUSTOM_COMMAND_SIG(nj_describe_key)
-CUSTOM_DOC("") {
+CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") {
     Query_Bar info_bar = {0};
     info_bar.prompt = make_lit_string("Press the desired keys to get it's description appended to the *messages* buffer: ");
     start_query_bar(app, &info_bar, 0);
