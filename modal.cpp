@@ -252,6 +252,7 @@ void
 nj_keys(Bind_Helper *context){
     begin_map(context, mapid_musthave);
     bind(context, ':', MDFR_CTRL, nj_execute_arbitrary_command);
+    bind(context, 'H', MDFR_CTRL, nj_describe_key);
     bind(context, key_f4, MDFR_ALT,  exit_4coder);
     bind(context, 'q',    MDFR_CTRL, exit_4coder);
     end_map(context);

@@ -30,7 +30,6 @@ CUSTOM_DOC("Activates 'normal' mode.")
     NJ_ENTER_MODE(NJ_CURRENT_MODE);
 }
 
-
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
     inherit_map(context, mapid_movements);
@@ -209,7 +208,7 @@ CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") 
         }
         
         print_message(app, key_name.str, key_name.size);
-        print_message(app, literal("> is not bound to any command.\n"));
+        print_message(app, literal("> either not bound to a command or bound to an undocumented command.\n"));
     }
     print_message(app, literal("\n"));
     
