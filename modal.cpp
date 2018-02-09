@@ -29,29 +29,36 @@ static void nj_invert_colors(Theme_Color *colors, int32_t len){
     }
 }
 
+//
+// Command Metadata Utilities {
+//
+
 // TODO(NJ): Ask Allen if it is possible to add command_id to Generic_Command
 // HACK(NJ): O(n^2) very bad, that it is
-static Custom_Command_Function *nj_get_command_pointer_by_name(String name){
-    Custom_Command_Function *result = 0;
+// HACK(NJ): SADNESS AND TERRIBLENESS :O
+static Command_Metadata nj_get_command_metadata_by_name(String name){
+    Command_Metadata result = {0};
     for(int32_t i = 0; i < command_one_past_last_id; ++i) {
         if(match_sc(name, fcoder_metacmd_table[i].name)) {
-            result = fcoder_metacmd_table[i].proc;
+            result = fcoder_metacmd_table[i];
             break;
         }
     }
     return(result);
 }
 
-static char *nj_get_command_name_by_pointer(Custom_Command_Function *command){
-    char *result = 0;
+static Command_Metadata nj_get_command_metadata_by_pointer(Custom_Command_Function *command){
+    Command_Metadata result = {0};
     for(int32_t i = 0; i < command_one_past_last_id; ++i) {
         if(command == fcoder_metacmd_table[i].proc) {
-            result = fcoder_metacmd_table[i].name;
+            result = fcoder_metacmd_table[i];
             break;
         }
     }
     return(result);
 }
+
+// }
 
 //
 // Modes
@@ -100,7 +107,8 @@ modifier(search)
 
 enum NJ_Mapid {
     mapid_normal = mapid_global,
-    mapid_movements = 80000,
+    mapid_musthave = 80000,
+    mapid_movements,
     mapid_common,
     
 #define NJ_MODE_MAPID(mode) mapid_##mode,
@@ -242,10 +250,14 @@ inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
 
 void
 nj_keys(Bind_Helper *context){
-    begin_map(context, mapid_common);
+    begin_map(context, mapid_musthave);
+    bind(context, ':', MDFR_CTRL, nj_execute_arbitrary_command);
     bind(context, key_f4, MDFR_ALT,  exit_4coder);
     bind(context, 'q',    MDFR_CTRL, exit_4coder);
+    end_map(context);
     
+    begin_map(context, mapid_common);
+    inherit_map(context, mapid_musthave);
     bind(context, ' ', MDFR_ALT, nj_toggler);
     
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);

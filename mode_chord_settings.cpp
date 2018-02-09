@@ -31,7 +31,7 @@ CUSTOM_DOC("Activates 'chord_settings' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap);
+    inherit_map(context, mapid_musthave);
     bind(context, 'b', MDFR_NONE, nj_chord_settings_toggle_filebar_then_prev);
     bind(context, 'c', MDFR_NONE, nj_chord_settings_clean_lines_then_prev);
     bind(context, 's', MDFR_NONE, nj_chord_settings_toggle_scrollbar_then_prev);

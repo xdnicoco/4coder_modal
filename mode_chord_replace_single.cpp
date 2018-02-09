@@ -32,7 +32,7 @@ CUSTOM_DOC("Activates 'chord replace single' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap);
+    inherit_map(context, mapid_musthave);
     bind_vanilla_keys(context, nj_replace_character_then_prev);
     bind(context, 'v', MDFR_CTRL, nj_mode_chord_replace_single_paste_then_prev);
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
