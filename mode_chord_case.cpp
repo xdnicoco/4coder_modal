@@ -51,7 +51,7 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    Range range = get_range(&view);
+    Range range = get_view_range(&view);
     int32_t size = range.max - range.min;
     if (size <= app->memory_size){
         char *mem = (char*)app->memory;
@@ -72,7 +72,7 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    Range range = get_range(&view);
+    Range range = get_view_range(&view);
     int32_t size = range.max - range.min;
     if (size <= app->memory_size){
         char *mem = (char*)app->memory;
@@ -93,7 +93,7 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    Range range = get_range(&view);
+    Range range = get_view_range(&view);
     int32_t size = range.max - range.min;
     if (size <= app->memory_size){
         char *mem = (char*)app->memory;

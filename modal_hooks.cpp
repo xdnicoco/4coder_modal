@@ -68,12 +68,9 @@ START_HOOK_SIG(nj_start){
     named_map_count = ArrayCount(nj_named_maps_values);
     nj_previous_mapid = mapid_normal;
     
-    default_4coder_initialize(app);
+    Face_Description command_line_description = get_face_description(app, 0);
+    default_4coder_initialize(app, command_line_description.pt_size, command_line_description.hinting);
     nj_init(app, files, file_count);
-    
-    if (automatically_load_project){
-        load_project(app);
-    }
     
     // no meaning for return
     return(0);

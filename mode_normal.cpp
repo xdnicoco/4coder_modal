@@ -808,7 +808,7 @@ void nj_replace_rectangle_function(Application_Links *app, char *str, int32_t le
     View_Summary view = get_active_view(app, access);
     Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
     
-    Range range = get_range(&view);
+    Range range = get_view_range(&view);
     int32_t min_line_index;
     int32_t max_line_index;
     if(view.cursor.line > view.mark.line){

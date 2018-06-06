@@ -102,7 +102,7 @@ nj_replace_mode_clipboard_cut(Application_Links *app, int32_t start, int32_t end
     Buffer_Summary buffer = {0};
     int32_t result = false;
     
-    if (clipboard_copy(app, start, end, &buffer, access)){
+    if (post_buffer_range_to_clipboard(app, &global_part, 0, &buffer, start, end)){
         nj_replace_mode_delete(app, start, end, &buffer);
         if (buffer_out){*buffer_out = buffer;}
     }
@@ -138,7 +138,7 @@ CUSTOM_COMMAND_SIG(nj_replace_mode_cut)
 CUSTOM_DOC("Copies the range to clipboard, then replaces it with spaces"){
     uint32_t access = AccessOpen;
     View_Summary view = get_active_view(app, access);
-    Range range = get_range(&view);
+    Range range = get_view_range(&view);
     nj_replace_mode_clipboard_cut(app, range.min, range.max, 0, access);
 }
 
@@ -216,7 +216,7 @@ CUSTOM_DOC("TODO"){
                 clipboard_index(app, 0, paste_index, str, len);
                 
                 Buffer_Summary buffer = get_buffer(app, view.buffer_id, access);
-                Range range = get_range(&view);
+                Range range = get_view_range(&view);
                 int32_t pos = range.min;
                 
                 undo(app);
