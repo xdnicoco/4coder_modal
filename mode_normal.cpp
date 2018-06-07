@@ -326,6 +326,7 @@ CUSTOM_DOC("Starts to record a keyboard macro.") {
                 
                 if(in.command.command &&
                    (in.command.command != nj_start_recording_keyboard_macro) &&
+                   (in.command.command != nj_print_keyboard_macro) &&
                    (in.command.command != nj_play_keyboard_macro) &&
                    (in.command.command != nj_play_last_keyboard_macro))
                 {
