@@ -330,6 +330,7 @@ nj_keys(Bind_Helper *context){
     
     bind(context, ' ',  MDFR_CTRL, set_mark);
     bind(context, ';',  MDFR_CTRL, cursor_mark_swap);
+    bind(context, ',',  MDFR_ALT,  nj_chord_snippet_comma);
     bind(context, ';',  MDFR_ALT,  nj_chord_snippet_eol_semicolon);
     bind(context, '\\', MDFR_ALT,  nj_chord_snippet_eol_backslash);
     bind(context, 'c',  MDFR_CTRL, copy);
@@ -337,7 +338,7 @@ nj_keys(Bind_Helper *context){
     bind(context, '@',  MDFR_ALT,  open_matching_file_cpp);
     bind(context, 'a',  MDFR_CTRL, select_all);
     bind(context, 'a',  MDFR_ALT,  nj_ocd_equals);
-    bind(context, 'a',  MDFR_CTLT, nj_ocd_arbitrary);
+    bind(context, 'A',  MDFR_CTRL, nj_ocd_arbitrary);
     bind(context, 'd',  MDFR_ALT,  delete_range);
     bind(context, 'D',  MDFR_ALT,  delete_line);
     bind(context, 'd',  MDFR_CTLT, nj_delete_rectangle);
