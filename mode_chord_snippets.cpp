@@ -42,7 +42,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'b', MDFR_NONE, nj_chord_snippet_long_braces_break_then_insert);
     bind(context, '}', MDFR_NONE, nj_chord_snippet_long_braces_break_then_insert);
     bind(context, 'c', MDFR_NONE, nj_chord_snippet_case_then_insert);
-    bind(context, 'd', MDFR_NONE, nj_write_date_then_prev);
+    bind(context, 'd', MDFR_NONE, nj_chord_snippet_date);
     bind(context, 'i', MDFR_NONE, nj_chord_snippet_if_then_insert);
     bind(context, 'e', MDFR_NONE, nj_chord_snippet_else_then_insert);
     bind(context, 'E', MDFR_NONE, nj_chord_snippet_else_if_then_insert);
@@ -51,13 +51,14 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 's', MDFR_NONE, nj_chord_snippet_switch_then_insert);
     bind(context, 'r', MDFR_NONE, nj_chord_snippet_return_then_insert);
     
-    bind(context, '0',  MDFR_NONE, nj_chord_snippet_zero_struct_then_prev);
-    bind(context, '=',  MDFR_NONE, nj_chord_snippet_equals_semicolon_then_prev);
+    bind(context, '0',  MDFR_NONE, nj_chord_snippet_zero_struct);
+    bind(context, '=',  MDFR_NONE, nj_chord_snippet_equals_semicolon);
     bind(context, '*',  MDFR_NONE, nj_chord_snippet_eol_block_then_insert);
-    bind(context, ';',  MDFR_NONE, nj_chord_snippet_eol_semicolon_then_prev);
-    bind(context, '\\', MDFR_NONE, nj_chord_snippet_eol_backslash_then_prev);
-    bind(context, '/',  MDFR_NONE, nj_toggle_comment_line_then_prev);
-    bind(context, '#',  MDFR_NONE, nj_include_gaurd_file_then_prev);
+    bind(context, ',',  MDFR_NONE, nj_chord_snippet_comma);
+    bind(context, ';',  MDFR_NONE, nj_chord_snippet_eol_semicolon);
+    bind(context, '\\', MDFR_NONE, nj_chord_snippet_eol_backslash);
+    bind(context, '/',  MDFR_NONE, nj_toggle_comment_line);
+    bind(context, '#',  MDFR_NONE, nj_include_gaurd_file);
     bind(context, key_esc, MDFR_NONE, nj_mode_enter_normal);
     end_map(context);
 }
@@ -84,7 +85,7 @@ nj_chord_snippet_named_comment_string(Application_Links *app, char *type_string)
     write_string(app, str);
 }
 
-CUSTOM_COMMAND_SIG(nj_chord_snippet_equals_semicolon_then_prev)
+CUSTOM_COMMAND_SIG(nj_chord_snippet_equals_semicolon)
 CUSTOM_DOC("At the end of the line, insert a ' = ;', then return to the previous mode."){
     seek_end_of_textual_line(app);
     write_string(app, make_lit_string(" = ;"));
@@ -120,7 +121,7 @@ CUSTOM_DOC("At the end of the line, insert a '// IMPORTANT' comment, includes us
     NJ_ENTER_MODE(insert);
 }
 
-CUSTOM_COMMAND_SIG(nj_chord_snippet_zero_struct_then_prev)
+CUSTOM_COMMAND_SIG(nj_chord_snippet_zero_struct)
 CUSTOM_DOC("At the end of the line, insert a ' = {0};', then return to the previous mode."){
     seek_end_of_textual_line(app);
     uint32_t access = AccessOpen;
@@ -328,15 +329,11 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a ' /*  */', then ac
     write_string(app, make_lit_string(" /*  */"));
     NJ_ENTER_MODE(insert);
 }
+
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_semicolon)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ';'."){
     seek_end_of_textual_line(app);
     write_string(app, make_lit_string(";"));
-    move_down_textual(app);
-}
-CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_semicolon_then_prev)
-CUSTOM_DOC("At the end of the line under the cursor, insert a ';', then return to the previous mode."){
-    nj_chord_snippet_eol_semicolon(app);
     move_down_textual(app);
     nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
@@ -346,10 +343,14 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a '\\'."){
     seek_end_of_textual_line(app);
     write_string(app, make_lit_string(" \\"));
     move_down_textual(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
-CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash_then_prev)
-CUSTOM_DOC("At the end of the line under the cursor, insert a '\\', then return to the previous mode."){
-    nj_chord_snippet_eol_backslash(app);
+
+CUSTOM_COMMAND_SIG(nj_chord_snippet_comma)
+CUSTOM_DOC("At the end of the line under the cursor, insert a ','."){
+    seek_end_of_textual_line(app);
+    write_string(app, make_lit_string(","));
+    move_down_textual(app);
     nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
@@ -370,11 +371,6 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
         buffer_replace_range(app, &buffer, pos, pos, literal("// "));
     }
     move_down_textual(app);
-}
-
-CUSTOM_COMMAND_SIG(nj_toggle_comment_line_then_prev)
-CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then move the cursor to the next line and return to the previous mode."){
-    nj_toggle_comment_line(app);
     nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
@@ -431,15 +427,11 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
     end_temp_memory(temp);
     
     view_set_cursor(app, &view, seek_line_char(3, 0), 1);
-}
-CUSTOM_COMMAND_SIG(nj_include_gaurd_file_then_prev)
-CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the current buffer file name, then return to the previous mode."){
-    nj_include_gaurd_file(app);
     nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 #include <time.h>
-CUSTOM_COMMAND_SIG(nj_write_date_then_prev)
+CUSTOM_COMMAND_SIG(nj_chord_snippet_date)
 CUSTOM_DOC("Insert the date under the cursor, then return to the previous mode."){
     time_t rawtime;
     struct tm * timeinfo;
