@@ -32,7 +32,7 @@ CUSTOM_DOC("Activates 'search' mode.")
 
 NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     begin_map(context, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-    inherit_map(context, mapid_nomap);
+    inherit_map(context, mapid_musthave);
     
     bind_vanilla_keys(context, nj_mode_search_append_char);
     bind(context, key_back, MDFR_NONE, nj_mode_search_backspace_char);
@@ -41,6 +41,12 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, key_down, MDFR_NONE, nj_mode_search_step_forward);
     bind(context, key_page_up, MDFR_NONE, nj_mode_search_step_backward);
     bind(context, key_page_down, MDFR_NONE, nj_mode_search_step_forward);
+    
+    bind(context, 'k', MDFR_CTRL, nj_mode_search_step_backward);
+    bind(context, 'j', MDFR_CTRL, nj_mode_search_step_forward);
+    
+    bind(context, 'N', MDFR_CTRL, nj_mode_search_step_backward);
+    bind(context, 'n', MDFR_CTRL, nj_mode_search_step_forward);
     
     bind(context, 'v', MDFR_CTRL, nj_mode_search_paste);
     

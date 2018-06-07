@@ -179,7 +179,10 @@ CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") 
     
     Command_Metadata command_meta = nj_get_command_metadata_by_pointer(in.command.command);
     if(command_meta.proc) {
-        print_message(app, literal("The command for <"));
+        print_message(app, literal("The command for '"));
+        char *mode_name = nj_get_mode_name_by_mapid(nj_current_mapid);
+        print_message(app, mode_name, str_size(mode_name));
+        print_message(app, literal("':<"));
         if(in.key.modifiers[MDFR_SHIFT_INDEX]) {
             print_message(app, literal("shift+"));
         }
@@ -197,7 +200,6 @@ CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") 
         print_message(app, literal("]\nAt: "));
         print_message(app, command_meta.source_name, command_meta.source_name_len);
         print_message(app, literal("\n"));
-        
         print_message(app, command_meta.description, command_meta.description_len);
         print_message(app, literal("\n"));
     }

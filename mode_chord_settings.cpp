@@ -43,7 +43,6 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'v', MDFR_NONE, nj_chord_settings_toggle_virtual_whitespace_then_prev);
     bind(context, 'V', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev);
     bind(context, 'r', MDFR_NONE, nj_chord_settings_reload_file_from_disk);
-    bind(context, 'h', MDFR_NONE, nj_chord_settings_describe_key);
     bind(context, 'q', MDFR_NONE, exit_4coder);
     
     bind(context, key_down,  MDFR_NONE, nj_move_panel_down_then_prev);
@@ -238,13 +237,5 @@ CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
     buffer_set_setting(app, &buffer, BufferSetting_Unimportant, !buffer_is_unimportant);
     nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
-
-CUSTOM_COMMAND_SIG(nj_chord_settings_describe_key)
-CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer, then go back to the previous mode.") {
-    nj_describe_key(app);
-    
-    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
-}
-
 
 #endif // _MODE_CHORD_SETTINGS

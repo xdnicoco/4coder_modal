@@ -165,7 +165,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_
 #define NJ_INCLUDE_MODE_FILE(mode)  NJ_INCLUDE_MODE_FILE_(mode)
 
 inline void nj_activate_mode_by_mapid(Application_Links *app, NJ_Mapid mapid);
-inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid);
+inline char *nj_get_mode_name_by_mapid(NJ_Mapid mapid);
 inline void nj_finish_chord_action(Application_Links *app, NJ_Mapid current_mapid);
 
 CUSTOM_COMMAND_SIG(nj_activate_previous_mode)
@@ -242,13 +242,14 @@ inline void nj_finish_chord_action(Application_Links *app, NJ_Mapid chord_mapid)
     }
 }
 
-inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
+inline char *nj_get_mode_name_by_mapid(NJ_Mapid mapid){
     switch(mapid)
     {
 #define NJ_GEN_MAPID_MODE_NAME_PAIR(mode) case mapid_##mode: {return (#mode);}break;
         NJ_GEN_MAPID_MODE_NAME_PAIR(normal)
             NJ_MODES(NJ_GEN_MAPID_MODE_NAME_PAIR)
 #undef NJ_GEN_MAPID_MODE_NAME_PAIR
+            default: {return("*UNKONWN MAPPING*");}
     }
 }
 
