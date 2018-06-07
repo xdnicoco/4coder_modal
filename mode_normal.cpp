@@ -194,14 +194,21 @@ CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") 
         }
         
         print_message(app, key_name.str, key_name.size);
-        print_message(app, literal("> is: ["));
+        print_message(app, literal("> is:\n"));
+        print_message(app, command_meta.source_name, command_meta.source_name_len);
+        print_message(app, literal(":"));
+        
+        int32_t line_number_size = int_to_str_size(command_meta.line_number);
+        char *line_number_space = push_array(&global_part, char, line_number_size);
+        String line_number_str = make_string_cap(line_number_space, 0, line_number_size);
+        int_to_str(&line_number_str, command_meta.line_number);
+        print_message(app, line_number_str.str, line_number_str.size);
+        print_message(app, literal(": "));
         
         print_message(app, command_meta.name, command_meta.name_len);
-        print_message(app, literal("]\nAt: "));
-        print_message(app, command_meta.source_name, command_meta.source_name_len);
-        print_message(app, literal("\n"));
+        print_message(app, literal(": \""));
         print_message(app, command_meta.description, command_meta.description_len);
-        print_message(app, literal("\n"));
+        print_message(app, literal("\"\n"));
     }
     else {
         print_message(app, literal("The key <"));
@@ -218,7 +225,6 @@ CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") 
         print_message(app, key_name.str, key_name.size);
         print_message(app, literal("> either not bound to a command or bound to an undocumented command.\n"));
     }
-    print_message(app, literal("\n"));
     
     end_query_bar(app, &info_bar, 0);
     nj_open_messages_buffer(app);
