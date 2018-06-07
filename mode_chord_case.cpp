@@ -62,7 +62,7 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
         view_set_cursor(app, &view, seek_pos(range.max), true);
     }
     
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_case_lower)
@@ -83,7 +83,7 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
         view_set_cursor(app, &view, seek_pos(range.max), true);
     }
     
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_case_camel)
@@ -104,7 +104,7 @@ CUSTOM_DOC("Converts all ascii text in the range between the cursor and the mark
         view_set_cursor(app, &view, seek_pos(range.max), true);
     }
     
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_case_upper_token_or_word)

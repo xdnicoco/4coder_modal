@@ -43,7 +43,7 @@ CUSTOM_COMMAND_SIG(nj_replace_character_then_prev)
 CUSTOM_DOC("Replaces the character under the cursor with the pressed character, then return to the previous mode."){
     nj_replace_character(app);
     move_left(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_mode_chord_replace_single_paste_then_prev)
@@ -56,7 +56,7 @@ CUSTOM_DOC("Removes the character under the cursor, then paste from the clipboar
         delete_char(app);
     }
     paste(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 

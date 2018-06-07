@@ -69,14 +69,20 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 's', MDFR_NONE, save);
     
     bind(context, 'K', MDFR_NONE, kill_buffer);
-    bind(context, 'u', MDFR_CTRL, interactive_kill_buffer);
     bind(context, 'b', MDFR_NONE, interactive_switch_buffer);
+    bind(context, 'B', MDFR_NONE, nj_toggle_buffer_to_scratch);
+    bind(context, 'M', MDFR_NONE, nj_open_messages_buffer);
     
     bind(context, ' ', MDFR_NONE, set_mark);
     bind(context, '_', MDFR_NONE, write_character);
     
-    bind(context, 'L', MDFR_ALT,  to_lowercase);
-    bind(context, 'U', MDFR_ALT,  to_uppercase);
+    bind(context, 'L', MDFR_CTRL, nj_chord_case_lower_token_or_word);
+    bind(context, 'U', MDFR_CTRL, nj_chord_case_upper_token_or_word);
+    bind(context, 'C', MDFR_CTRL, nj_chord_case_camel_token_or_word);
+    
+    bind(context, 'l', MDFR_CTLT, nj_chord_case_lower);
+    bind(context, 'u', MDFR_CTLT, nj_chord_case_upper);
+    bind(context, 'c', MDFR_CTLT, nj_chord_case_camel);
     
     bind(context, 't', MDFR_NONE, list_all_substring_locations_case_insensitive);
     bind(context, 'T', MDFR_NONE, list_all_locations_of_identifier);
@@ -213,6 +219,7 @@ CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer.") 
     print_message(app, literal("\n"));
     
     end_query_bar(app, &info_bar, 0);
+    nj_open_messages_buffer(app);
 }
 
 /*
@@ -1201,6 +1208,29 @@ CUSTOM_DOC("If the current file is a *.cpp or *.h, attempts to open the correspo
     if (get_cpp_matching_file(app, buffer, &new_buffer)){
         view_set_buffer(app, &view, new_buffer.buffer_id, 0);
     }
+}
+
+CUSTOM_COMMAND_SIG(nj_toggle_buffer_to_scratch)
+CUSTOM_DOC("Sets the buffer in the active view to *scratch*."){
+    uint32_t access = AccessAll;
+    View_Summary view = get_active_view(app, access);
+    
+    Buffer_Summary buffer = get_buffer_by_name(app, literal("*scratch*"), access);
+    if(view.buffer_id == buffer.buffer_id) {
+        buffer = get_buffer_first(app, access);
+    }
+    
+    view_set_buffer(app, &view, buffer.buffer_id, 0);
+}
+
+CUSTOM_COMMAND_SIG(nj_open_messages_buffer)
+CUSTOM_DOC("Open *messages* in a the compile window."){
+    uint32_t access = AccessAll;
+    View_Summary view = get_or_open_build_panel(app);
+    
+    Buffer_Summary buffer = get_buffer_by_name(app, literal("*messages*"), access);
+    view_set_buffer(app, &view, buffer.buffer_id, 0);
+    view_set_cursor(app, &view, seek_pos(buffer.size), 1);
 }
 
 CUSTOM_COMMAND_SIG(nj_seek_end_of_file)

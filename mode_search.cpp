@@ -154,7 +154,7 @@ CUSTOM_DOC("Seek back to position before starting the search, then activate the 
     end_query_bar(app, &nj_mode_search_state.bar, 0);
     view_set_highlight(app, &view, 0, 0, false);
     view_set_cursor(app, &view, seek_pos(nj_mode_search_state.last_position.pos), true);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_mode_search_complete)
@@ -162,7 +162,7 @@ CUSTOM_DOC("Seek back to position before starting the search, then activate the 
     View_Summary view = get_active_view(app, AccessProtected);
     end_query_bar(app, &nj_mode_search_state.bar, 0);
     view_set_highlight(app, &view, 0, 0, false);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_mode_search_paste)

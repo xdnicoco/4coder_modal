@@ -64,6 +64,10 @@ static Command_Metadata nj_get_command_metadata_by_pointer(Custom_Command_Functi
 // Modes
 //
 
+#define MDFR_CTLT MDFR_CTRL  | MDFR_ALT
+#define MDFR_SHRL MDFR_SHIFT | MDFR_CTRL
+#define MDFR_SHLT MDFR_SHIFT | MDFR_ALT
+
 // Mode Global storage {
 
 struct NJ_Search_State {
@@ -132,7 +136,8 @@ static void mode_enter_##mode(struct Application_Links *app, int buffer_id){    
     buffer = get_buffer(app, buffer_id, access);                                                                                                        \
     buffer_get_setting(app, &buffer, BufferSetting_MapID, (int32_t *)&nj_current_mapid);                                                                \
     if(nj_current_mapid != mapid_##mode) nj_previous_mapid = nj_current_mapid;                                                                          \
-    buffer_set_setting(app, &buffer, BufferSetting_MapID, mapid_##mode);                                                                                \
+    nj_current_mapid = mapid_##mode;                                                                                                                    \
+    buffer_set_setting(app, &buffer, BufferSetting_MapID, nj_current_mapid);                                                                            \
     Theme_Color colors[] =  {                                                                                                                           \
         { Stag_Back,          color_bg         },                                                                                                       \
         { Stag_Margin,        color_bar        },                                                                                                       \
@@ -161,6 +166,7 @@ NJ_MODE_PRINT_ENTER_FUNCTION_(mode, color_bg, color_bar, color_bar_hover, color_
 
 inline void nj_activate_mode_by_mapid(Application_Links *app, NJ_Mapid mapid);
 inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid);
+inline void nj_finish_chord_action(Application_Links *app, NJ_Mapid current_mapid);
 
 CUSTOM_COMMAND_SIG(nj_activate_previous_mode)
 CUSTOM_DOC("Activate the mode previous to the current mode.")
@@ -230,6 +236,12 @@ inline void nj_activate_mode_by_mapid(Application_Links *app, NJ_Mapid mapid){
     }
 }
 
+inline void nj_finish_chord_action(Application_Links *app, NJ_Mapid chord_mapid) {
+    if(nj_current_mapid == chord_mapid) {
+        nj_activate_previous_mode(app);
+    }
+}
+
 inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
     switch(mapid)
     {
@@ -243,10 +255,6 @@ inline char *nj_get_mode_name_by_mapid(Application_Links *app, NJ_Mapid mapid){
 //
 // Key Bindings
 //
-
-#define MDFR_CTLT MDFR_CTRL  | MDFR_ALT
-#define MDFR_SHRL MDFR_SHIFT | MDFR_CTRL
-#define MDFR_SHLT MDFR_SHIFT | MDFR_ALT
 
 void
 nj_keys(Bind_Helper *context){
@@ -432,12 +440,12 @@ nj_keys(Bind_Helper *context){
     bind(context, 'j', MDFR_NONE, move_down);
     bind(context, 'j', MDFR_ALT,  move_down_10);
     bind(context, 'j', MDFR_CTRL, seek_whitespace_down_end_line);
-    bind(context, 'j', MDFR_CTLT, move_line_down);
+    bind(context, 'J', MDFR_CTRL, move_line_down);
     
     bind(context, 'k', MDFR_NONE, move_up);
     bind(context, 'k', MDFR_ALT,  move_up_10);
     bind(context, 'k', MDFR_CTRL, seek_whitespace_up_end_line);
-    bind(context, 'k', MDFR_CTLT, move_line_up);
+    bind(context, 'K', MDFR_CTRL, move_line_up);
     
     bind(context, 'l', MDFR_NONE, move_right);
     bind(context, 'l', MDFR_CTRL, seek_alphanumeric_or_camel_right);

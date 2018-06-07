@@ -41,7 +41,7 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
 CUSTOM_COMMAND_SIG(nj_insert_character_then_prev)
 CUSTOM_DOC("Inserts whatever character was used to trigger this command, then return to the previous mode."){
     write_character(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 #endif // _MODE_CHORD_INSERT_SINGLE_CPP

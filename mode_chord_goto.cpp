@@ -101,13 +101,13 @@ CUSTOM_DOC("Applies changes made to the goto mode state."){
 CUSTOM_COMMAND_SIG(nj_chord_goto_seek_end_of_file_then_prev)
 CUSTOM_DOC("Places the cursor at the end of the buffer, then activate the previous mode."){
     nj_seek_end_of_file(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_seek_beginning_of_file_then_prev)
 CUSTOM_DOC("Places the cursor at the beggining of the buffer, then activate the previous mode."){
     nj_seek_beginning_of_file(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_goto_seek_line)
@@ -157,7 +157,7 @@ CUSTOM_COMMAND_SIG(nj_chord_goto_cancel)
 CUSTOM_DOC("Seek back to the line number before entering chord goto mode, then activate the previous mode."){
     nj_chord_goto_state.goto_mode = nj_chord_goto_mode_cancel;
     nj_chord_goto_apply(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 #endif // _MODE_CHORD_GOTO_CPP

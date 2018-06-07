@@ -89,7 +89,7 @@ CUSTOM_DOC("At the end of the line, insert a ' = ;', then return to the previous
     seek_end_of_textual_line(app);
     write_string(app, make_lit_string(" = ;"));
     move_down_textual(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_todo_then_insert)
@@ -133,7 +133,7 @@ CUSTOM_DOC("At the end of the line, insert a ' = {0};', then return to the previ
     }
     write_string(app, make_lit_string(" = {0};"));
     move_down_textual(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 inline void nj_move_cursor_to_relative_line_then_char(Application_Links *app, int32_t rel_line, int32_t rel_char) {
@@ -337,8 +337,8 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a ';'."){
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_semicolon_then_prev)
 CUSTOM_DOC("At the end of the line under the cursor, insert a ';', then return to the previous mode."){
     nj_chord_snippet_eol_semicolon(app);
-    nj_activate_previous_mode(app);
     move_down_textual(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash)
@@ -350,7 +350,7 @@ CUSTOM_DOC("At the end of the line under the cursor, insert a '\\'."){
 CUSTOM_COMMAND_SIG(nj_chord_snippet_eol_backslash_then_prev)
 CUSTOM_DOC("At the end of the line under the cursor, insert a '\\', then return to the previous mode."){
     nj_chord_snippet_eol_backslash(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_toggle_comment_line)
@@ -375,7 +375,7 @@ CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then mo
 CUSTOM_COMMAND_SIG(nj_toggle_comment_line_then_prev)
 CUSTOM_DOC("Toggles '// ' at the beggining of the line under the cursor, then move the cursor to the next line and return to the previous mode."){
     nj_toggle_comment_line(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_include_gaurd_file)
@@ -435,7 +435,7 @@ CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the curren
 CUSTOM_COMMAND_SIG(nj_include_gaurd_file_then_prev)
 CUSTOM_DOC("Insert a c include gaurd around the current buffer, using the current buffer file name, then return to the previous mode."){
     nj_include_gaurd_file(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 #include <time.h>
@@ -452,7 +452,7 @@ CUSTOM_DOC("Insert the date under the cursor, then return to the previous mode."
     
     String date_string = make_string(date_string_space, str_size(date_string_space));
     write_string(app, date_string);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 #endif // _MODE_CHORD_SNIPPETS_CPP

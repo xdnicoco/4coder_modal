@@ -41,7 +41,9 @@ NJ_MODE_BIND_DECLERATION(NJ_CURRENT_MODE){
     bind(context, 'I', MDFR_NONE, nj_chord_settings_toggle_buffer_importance_then_prev);
     bind(context, 't', MDFR_NONE, nj_chord_settings_open_color_tweaker_then_prev);
     bind(context, 'v', MDFR_NONE, nj_chord_settings_toggle_virtual_whitespace_then_prev);
-    bind(context, '?', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev);
+    bind(context, 'V', MDFR_NONE, nj_chord_settings_toggle_show_whitespace_then_prev);
+    bind(context, 'r', MDFR_NONE, nj_chord_settings_reload_file_from_disk);
+    bind(context, 'h', MDFR_NONE, nj_chord_settings_describe_key);
     bind(context, 'q', MDFR_NONE, exit_4coder);
     
     bind(context, key_down,  MDFR_NONE, nj_move_panel_down_then_prev);
@@ -63,49 +65,55 @@ CUSTOM_DOC("Toggles the visibility status of the current view's scrollbar."){
 CUSTOM_COMMAND_SIG(nj_chord_settings_open_color_tweaker_then_prev)
 CUSTOM_DOC("Opens the 4coder color tweaker, then go back to the previous mode."){
     open_color_tweaker(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_scrollbar_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's scrollbar, then go back to the previous mode."){
     toggle_scrollbar(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_filebar_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's filebar, then go back to the previous mode."){
     toggle_filebar(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_fullscreen_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's fullscreen, then go back to the previous mode."){
     toggle_fullscreen(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_line_wrap_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's line wrap, then go back to the previous mode."){
     toggle_line_wrap(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_virtual_whitespace_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's virtual whitespace, then go back to the previous mode."){
     toggle_virtual_whitespace(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_show_whitespace_then_prev)
 CUSTOM_DOC("Toggles the visibility status of the current view's whitespace, then go back to the previous mode."){
     toggle_show_whitespace(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+}
+
+CUSTOM_COMMAND_SIG(nj_chord_settings_reload_file_from_disk)
+CUSTOM_DOC("Reloads the file opened in the active buffer."){
+    reopen(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_clean_lines_then_prev)
 CUSTOM_DOC("Removes trailing whitespace from all lines in the current buffer, then go back to previous mode."){
     clean_all_lines(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_set_modal_color_theme){
@@ -189,7 +197,7 @@ CUSTOM_COMMAND_SIG(nj_chord_settings_invert_colors_then_prev)
 CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
     nj_theme_colors_inverted = !nj_theme_colors_inverted;
     nj_set_modal_color_theme(app);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_move_panel_down_then_prev)
@@ -203,7 +211,7 @@ CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
     
     View_Summary new_view = get_active_view(app, access);
     view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_move_panel_right_then_prev)
@@ -217,7 +225,7 @@ CUSTOM_DOC("Closes the current panel and re opens it bellow the current panel"){
     
     View_Summary new_view = get_active_view(app, access);
     view_set_buffer(app, &new_view, buffer.buffer_id, buffer.lock_flags);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
 
 CUSTOM_COMMAND_SIG(nj_chord_settings_toggle_buffer_importance_then_prev)
@@ -228,7 +236,15 @@ CUSTOM_DOC("Inverts the theme colors, then go back to previous mode."){
     int32_t buffer_is_unimportant;
     buffer_get_setting(app, &buffer, BufferSetting_Unimportant, &buffer_is_unimportant);
     buffer_set_setting(app, &buffer, BufferSetting_Unimportant, !buffer_is_unimportant);
-    nj_activate_previous_mode(app);
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
 }
+
+CUSTOM_COMMAND_SIG(nj_chord_settings_describe_key)
+CUSTOM_DOC("Prints a given key binding descriptions to the *messages* buffer, then go back to the previous mode.") {
+    nj_describe_key(app);
+    
+    nj_finish_chord_action(app, NJ_MODE_MAPID(NJ_CURRENT_MODE));
+}
+
 
 #endif // _MODE_CHORD_SETTINGS
